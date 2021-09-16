@@ -51,7 +51,7 @@ def decode_varint(byte_array, offset=0):
     unsigned_integer_value = 0
     varint_relative_offset = 0
 
-    for x in xrange(1, 10):
+    for x in range(1, 10):
 
         varint_byte = ord(byte_array[offset + varint_relative_offset:offset + varint_relative_offset + 1])
         varint_relative_offset += 1
@@ -95,7 +95,7 @@ def encode_varint(value):
         byte_array.insert(0, pack("B", byte))
         value >>= 8
 
-        for _ in xrange(8):
+        for _ in range(8):
             byte_array.insert(0, pack("B", (value & 0x7f) | 0x80))
             value >>= 7
 
