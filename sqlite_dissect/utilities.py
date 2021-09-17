@@ -275,3 +275,11 @@ def xunichr(c):
         return chr(c)
     else:
         return unichr(c)
+
+
+def xbuffer(s):
+    """Python 2/3 compatibility function for unichr(c)"""
+    if sys.version_info > (3, 0):
+        return bytes(memoryview(s))
+    else:
+        return buffer(s)

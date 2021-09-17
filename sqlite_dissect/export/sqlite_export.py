@@ -10,6 +10,7 @@ from uuid import uuid4
 from sqlite_dissect.constants import LOGGER_NAME
 from sqlite_dissect.constants import PAGE_TYPE
 from sqlite_dissect.exception import ExportError
+from sqlite_dissect.utilities import xbuffer
 
 """
 
@@ -354,13 +355,13 @@ class CommitSqliteExporter(object):
                         if text_affinity:
                             value = value.decode(database_text_encoding, "replace")
                         else:
-                            value = buffer(value)
+                            value = xbuffer(value)
                     elif isinstance(value, str):
                         try:
                             if text_affinity:
                                 value = value.decode(database_text_encoding, "replace")
                             else:
-                                value = buffer(value)
+                                value = xbuffer(value)
                         except UnicodeDecodeError:
 
                             """
@@ -374,7 +375,7 @@ class CommitSqliteExporter(object):
 
                             """
 
-                            value = buffer(value)
+                            value = xbuffer(value)
 
                     cell_record_column_values.append(value)
 
