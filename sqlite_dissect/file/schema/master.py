@@ -34,7 +34,7 @@ from sqlite_dissect.file.schema.column import ColumnDefinition
 from sqlite_dissect.file.schema.utilities import parse_comment_from_sql_segment
 from sqlite_dissect.file.schema.table import TableConstraint
 from sqlite_dissect.file.schema.utilities import get_index_of_closing_parenthesis
-from sqlite_dissect.utilities import get_md5_hash
+from sqlite_dissect.utilities import get_md5_hash, iteritems
 
 """
 
@@ -422,7 +422,7 @@ class MasterSchema(object):
                 logger.error(log_message)
                 raise MasterSchemaParsingError(log_message)
 
-            for row_type, row_type_data in returned_master_schema_entry_data.iteritems():
+            for row_type, row_type_data in iteritems(returned_master_schema_entry_data):
                 if row_type in master_schema_entry_data:
                     master_schema_entry_data[row_type].extend(row_type_data)
                 else:
@@ -629,7 +629,7 @@ class MasterSchemaRow(object):
         for comment in self.comments:
             string += "\n" + padding + "Comment: {}".format(comment)
         if print_record_columns:
-            for index, record_column in self.record_columns.iteritems():
+            for index, record_column in iteritems(self.record_columns):
                 string += "\n" \
                           + padding + "Record Column {}:\n{}:".format(index, record_column.stringify(padding + "\t"))
         return string

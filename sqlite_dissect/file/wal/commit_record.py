@@ -21,7 +21,7 @@ from sqlite_dissect.file.schema.master import MasterSchema
 from sqlite_dissect.file.version import Version
 from sqlite_dissect.file.wal.utilities import compare_database_headers
 from sqlite_dissect.constants import BASE_VERSION_NUMBER
-from sqlite_dissect.utilities import get_md5_hash
+from sqlite_dissect.utilities import get_md5_hash, iteritems
 
 """
 
@@ -648,7 +648,7 @@ class WriteAheadLogCommitRecord(Version):
         string += "\n" + padding + "Database Header Differences:"
 
         # Parse the database header differences
-        for field, difference in self.database_header_differences.iteritems():
+        for field, difference in iteritems(self.database_header_differences):
             difference_string = "\n" + padding + "\t" + "Field: {} changed from previous Value: {} to new Value: {}"
             string += difference_string.format(field, difference[0], difference[1])
 

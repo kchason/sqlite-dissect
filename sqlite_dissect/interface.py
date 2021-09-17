@@ -14,6 +14,7 @@ from sqlite_dissect.file.schema.master import VirtualTableRow
 from sqlite_dissect.export.csv_export import CommitCsvExporter
 from sqlite_dissect.export.sqlite_export import CommitSqliteExporter
 from sqlite_dissect.file.wal.wal import WriteAheadLog
+from sqlite_dissect.utilities import iteritems
 from sqlite_dissect.version_history import VersionHistory
 from sqlite_dissect.version_history import VersionHistoryParser
 
@@ -130,7 +131,7 @@ def carve_table(table_name, signature, version):
     b_tree_pages = get_pages_from_b_tree_page(version.get_b_tree_root_page(master_schema_entry.root_page_number))
     b_tree_pages = {b_tree_page.number: b_tree_page for b_tree_page in b_tree_pages}
     carved_cells = []
-    for page_number, page in b_tree_pages.iteritems():
+    for page_number, page in iteritems(b_tree_pages):
         #  For carving freeblocks make sure the page is a b-tree page and not overflow
         if isinstance(page, BTreePage):
             carvings = SignatureCarver.carve_freeblocks(version, CELL_SOURCE.B_TREE, page.freeblocks, signature)

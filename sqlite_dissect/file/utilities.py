@@ -1,4 +1,5 @@
 from sqlite_dissect.file.wal.commit_record import WriteAheadLogCommitRecord
+from sqlite_dissect.utilities import iteritems
 
 """
 
@@ -13,8 +14,8 @@ validate_page_version_history(version_history)
 
 
 def validate_page_version_history(version_history):
-    for version_number, version in version_history.versions.iteritems():
-        for page_number, page in version.pages.iteritems():
+    for version_number, version in iteritems(version_history.versions):
+        for page_number, page in iteritems(version.pages):
             if page.page_version_number != version.page_version_index[page.number]:
                 return False
             if page.version_number != version.version_number:

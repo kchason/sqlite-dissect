@@ -1,6 +1,8 @@
 from logging import getLogger
 from re import sub
 from warnings import warn
+
+from sqlite_dissect import iteritems
 from sqlite_dissect.carving.carver import SignatureCarver
 from sqlite_dissect.constants import BASE_VERSION_NUMBER
 from sqlite_dissect.constants import CELL_SOURCE
@@ -501,7 +503,7 @@ class VersionHistoryParser(VersionParser):
                     deleted_cells = {}
 
                     # Iterate through the current cells
-                    for current_cell_md5, current_cell in self._current_cells.iteritems():
+                    for current_cell_md5, current_cell in iteritems(self._current_cells):
 
                         # Remove the cell from the added cells if it was already pre-existing
                         if current_cell_md5 in added_cells:
@@ -694,7 +696,7 @@ class VersionHistoryParser(VersionParser):
                             # Initialize the carved cells
                             carved_cells = []
 
-                            for freelist_page_number, freelist_page in updated_freelist_pages.iteritems():
+                            for freelist_page_number, freelist_page in iteritems(updated_freelist_pages):
 
                                 # Carve unallocated space
                                 carvings = SignatureCarver.carve_unallocated_space(version, CELL_SOURCE.FREELIST,
