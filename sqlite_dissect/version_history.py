@@ -19,6 +19,7 @@ from sqlite_dissect.file.database.utilities import get_pages_from_b_tree_page
 from sqlite_dissect.file.schema.master import VirtualTableRow
 from sqlite_dissect.file.wal.commit_record import WriteAheadLogCommitRecord
 from sqlite_dissect.file.version_parser import VersionParser
+from sqlite_dissect.utilities import itervalues
 
 """
 
@@ -419,7 +420,7 @@ class VersionHistoryParser(VersionParser):
                                    self._current_b_tree_page_numbers,
                                    self._carve_freelist_pages)
             if print_cells:
-                for current_cell in self._current_cells.itervalues():
+                for current_cell in itervalues(self._current_cells):
                     string += "\n" + padding + "Cell:\n{}".format(current_cell.stringify(padding + "\t"))
             return string
 
@@ -800,13 +801,13 @@ class Commit(object):
                                self.freelist_pages_carved,
                                self.updated_freelist_page_numbers)
         if print_cells:
-            for added_cell in self.added_cells.itervalues():
+            for added_cell in itervalues(self.added_cells):
                 string += "\n" + padding + "Added Cell:\n{}".format(added_cell.stringify(padding + "\t"))
-            for deleted_cell in self.deleted_cells.itervalues():
+            for deleted_cell in itervalues(self.deleted_cells):
                 string += "\n" + padding + "Deleted Cell:\n{}".format(deleted_cell.stringify(padding + "\t"))
-            for updated_cell in self.updated_cells.itervalues():
+            for updated_cell in itervalues(self.updated_cells):
                 string += "\n" + padding + "Updated Cell:\n{}".format(updated_cell.stringify(padding + "\t"))
-            for carved_cell in self.carved_cells.itervalues():
+            for carved_cell in itervalues(self.carved_cells):
                 string += "\n" + padding + "Carved Cell:\n{}".format(carved_cell.stringify(padding + "\t"))
         return string
 

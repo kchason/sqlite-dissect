@@ -21,7 +21,7 @@ from sqlite_dissect.file.schema.master import MasterSchema
 from sqlite_dissect.file.version import Version
 from sqlite_dissect.file.wal.utilities import compare_database_headers
 from sqlite_dissect.constants import BASE_VERSION_NUMBER
-from sqlite_dissect.utilities import get_md5_hash, iteritems
+from sqlite_dissect.utilities import get_md5_hash, iteritems, itervalues
 
 """
 
@@ -100,7 +100,7 @@ class WriteAheadLogCommitRecord(Version):
 
         self._database = database
 
-        for page_version_number in page_version_index.itervalues():
+        for page_version_number in itervalues(page_version_index):
             if page_version_number >= version_number:
                 log_message = "Page version number: {} is greater than the commit record specified version: {}."
                 log_message = log_message.format(page_version_number, version_number)

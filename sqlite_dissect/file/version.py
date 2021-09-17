@@ -21,6 +21,7 @@ from sqlite_dissect.file.database.page import TableInteriorPage
 from sqlite_dissect.file.database.page import TableLeafPage
 from sqlite_dissect.file.database.utilities import get_pages_from_b_tree_page
 from sqlite_dissect.file.schema.master import MasterSchema
+from sqlite_dissect.utilities import itervalues
 
 """
 
@@ -182,7 +183,7 @@ class Version(object):
                                self.pointer_map_pages_modified,
                                self.updated_b_tree_page_numbers)
         if print_pages:
-            for page in self.pages.itervalues():
+            for page in itervalues(self.pages):
                 string += "\n" + padding + "Page:\n{}".format(page.stringify(padding + "\t"))
         if print_schema:
             string += "\n" \
