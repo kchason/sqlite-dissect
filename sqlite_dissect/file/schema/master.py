@@ -57,6 +57,8 @@ TriggerRow(MasterSchemaRow)
 
 class MasterSchema(object):
 
+    row_type = ''
+
     MasterSchemaEntryData = namedtuple("MasterSchemaEntryData",
                                        "record_columns row_type sql b_tree_table_leaf_page_number cell")
 
