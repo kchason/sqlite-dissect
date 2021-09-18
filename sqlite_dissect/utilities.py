@@ -247,7 +247,7 @@ def has_content(byte_array):
 
 def iterkeys(d):
     """Python 2/3 compatibility function for dict.iterkeys()"""
-    if sys.version_info >= (3, 0):
+    if sys.version_info > (3, 0):
         return d.keys()
     else:
         return d.iterkeys()
@@ -255,7 +255,7 @@ def iterkeys(d):
 
 def itervalues(d):
     """Python 2/3 compatibility function for dict.itervalues()"""
-    if sys.version_info >= (3, 0):
+    if sys.version_info > (3, 0):
         return d.values()
     else:
         return d.itervalues()
@@ -263,7 +263,7 @@ def itervalues(d):
 
 def iteritems(d):
     """Python 2/3 compatibility function for dict.iteritems()"""
-    if sys.version_info >= (3, 0):
+    if sys.version_info > (3, 0):
         return d.items()
     else:
         return d.iteritems()
@@ -271,15 +271,13 @@ def iteritems(d):
 
 def xunichr(c):
     """Python 2/3 compatibility function for unichr(c)"""
-    if sys.version_info >= (3, 0):
-        return chr(c)
-    else:
-        return unichr(c)
+    if sys.version_info > (3, 0):
+        unichr = chr
+    return unichr(c)
 
 
 def xbuffer(s):
     """Python 2/3 compatibility function for unichr(c)"""
-    if sys.version_info >= (3, 0):
-        return bytes(memoryview(s))
-    else:
-        return buffer(s)
+    if sys.version_info > (3, 0):
+        buffer = memoryview
+    return buffer(s)
