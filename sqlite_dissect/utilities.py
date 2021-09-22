@@ -267,17 +267,3 @@ def iteritems(d):
         return d.items()
     else:
         return d.iteritems()
-
-
-def xunichr(c):
-    """Python 2/3 compatibility function for unichr(c)"""
-    if sys.version_info > (3, 0):
-        unichr = chr
-    return unichr(c)
-
-
-def xbuffer(s):
-    """Python 2/3 compatibility function for unichr(c)"""
-    if sys.version_info > (3, 0):
-        buffer = memoryview
-    return buffer(s)

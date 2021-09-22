@@ -1,3 +1,4 @@
+import sys
 from logging import getLogger
 from os import rename
 from os.path import exists
@@ -10,7 +11,6 @@ from uuid import uuid4
 from sqlite_dissect.constants import LOGGER_NAME
 from sqlite_dissect.constants import PAGE_TYPE
 from sqlite_dissect.exception import ExportError
-from sqlite_dissect.utilities import xbuffer
 
 """
 
@@ -341,6 +341,11 @@ class CommitSqliteExporter(object):
 
             entries = []
 
+            # Python 2/3 compatibility logic for buffer which doesn't exist in Python 3 and has been
+            # replaced by memoryview in Python 3
+            if sys.version_info > (3, 0):
+                buffer = memoryview
+
             for cell in cells:
 
                 cell_record_column_values = []
@@ -355,13 +360,13 @@ class CommitSqliteExporter(object):
                         if text_affinity:
                             value = value.decode(database_text_encoding, "replace")
                         else:
-                            value = xbuffer(value)
+                            value = buffer(value)
                     elif isinstance(value, str):
                         try:
                             if text_affinity:
                                 value = value.decode(database_text_encoding, "replace")
                             else:
-                                value = xbuffer(value)
+                                value = buffer(value)
                         except UnicodeDecodeError:
 
                             """
@@ -375,7 +380,7 @@ class CommitSqliteExporter(object):
 
                             """
 
-                            value = xbuffer(value)
+                            value = buffer(value)
 
                     cell_record_column_values.append(value)
 

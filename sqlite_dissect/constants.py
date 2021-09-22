@@ -1,9 +1,9 @@
+import sys
 from collections import MutableMapping
 from logging import getLogger
 from re import compile
 from sys import maxunicode
 
-from sqlite_dissect.utilities import xunichr
 
 """
 
@@ -286,5 +286,9 @@ if maxunicode >= 0x10000:
                                     (0xDFFFE, 0xDFFFF), (0xEFFFE, 0xEFFFF), (0xFFFFE, 0xFFFFF),
                                     (0x10FFFE, 0x10FFFF)])
 
-_illegal_xml_ranges = ["%s-%s" % (xunichr(low), xunichr(high)) for (low, high) in _illegal_xml_characters]
+# Python 2/3 compatibility to allow SQLite Dissect to work with both major versions of Python
+if sys.version_info > (3, 0):
+    unichr = chr
+
+_illegal_xml_ranges = ["%s-%s" % (unichr(low), unichr(high)) for (low, high) in _illegal_xml_characters]
 ILLEGAL_XML_CHARACTER_PATTERN = compile(u'[%s]' % u''.join(_illegal_xml_ranges))
