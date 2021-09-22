@@ -56,7 +56,6 @@ TriggerRow(MasterSchemaRow)
 
 
 class MasterSchema(object):
-
     row_type = ''
 
     MasterSchemaEntryData = namedtuple("MasterSchemaEntryData",
@@ -472,7 +471,6 @@ class MasterSchema(object):
 
 
 class MasterSchemaRow(object):
-
     __metaclass__ = ABCMeta
 
     @abstractmethod
@@ -786,7 +784,6 @@ class MasterSchemaRow(object):
                     # Check to make sure the full comment indicators were found for "--" and "/*"
                     if (character == '-' and remaining_sql_command[index + 1] != '-') or \
                             (character == '/' and remaining_sql_command[index + 1] != '*'):
-
                         log_message = "Comment indicator '{}' found followed by an invalid secondary comment " \
                                       "indicator: {} found in {} name in sql for {} row name: {} and sql: {}."
                         log_message = log_message.format(character, remaining_sql_command[index + 1],
@@ -2299,7 +2296,6 @@ class ViewRow(MasterSchemaRow):
 
     def __init__(self, version_interface, b_tree_table_leaf_page_number,
                  b_tree_table_leaf_cell, record_columns, tables):
-
         super(ViewRow, self).__init__(version_interface, b_tree_table_leaf_page_number,
                                       b_tree_table_leaf_cell, record_columns)
 
@@ -2316,7 +2312,6 @@ class TriggerRow(MasterSchemaRow):
 
     def __init__(self, version_interface, b_tree_table_leaf_page_number,
                  b_tree_table_leaf_cell, record_columns, tables, views):
-
         super(TriggerRow, self).__init__(version_interface, b_tree_table_leaf_page_number,
                                          b_tree_table_leaf_cell, record_columns)
 

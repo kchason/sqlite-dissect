@@ -1,8 +1,14 @@
 import sys
-from collections import MutableMapping
 from logging import getLogger
 from re import compile
 from sys import maxunicode
+
+# This is handling for Python 2/3 compatibility since in Python 2, the library is "collections" but
+# in Python 3, the library must be imported (as of 3.10) as "collections.abc"
+try:
+    from collections.abc import MutableMapping
+except ImportError:
+    from collections import MutableMapping
 
 
 """
