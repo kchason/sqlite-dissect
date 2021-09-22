@@ -2,7 +2,7 @@ from logging import getLogger
 from re import sub
 from warnings import warn
 
-from sqlite_dissect import iteritems
+from sqlite_dissect.utilities import iteritems
 from sqlite_dissect.carving.carver import SignatureCarver
 from sqlite_dissect.constants import BASE_VERSION_NUMBER
 from sqlite_dissect.constants import CELL_SOURCE

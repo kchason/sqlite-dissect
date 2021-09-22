@@ -5,7 +5,7 @@ from logging import getLogger
 from re import sub
 from warnings import warn
 
-from sqlite_dissect import iteritems
+from sqlite_dissect.utilities import iteritems
 from sqlite_dissect.carving.utilities import get_content_size
 from sqlite_dissect.constants import LOGGER_NAME
 from sqlite_dissect.constants import MASTER_SCHEMA_ROW_TYPE
