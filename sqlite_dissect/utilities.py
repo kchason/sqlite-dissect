@@ -5,7 +5,7 @@ from logging import getLogger
 from re import compile
 from struct import pack
 from struct import unpack
-from sqlite_dissect.constants import ALL_ZEROS_REGEX
+from sqlite_dissect.constants import ALL_ZEROS_REGEX, UTF_8
 from sqlite_dissect.constants import LOGGER_NAME
 from sqlite_dissect.constants import OVERFLOW_HEADER_LENGTH
 from sqlite_dissect.constants import BLOB_SIGNATURE_IDENTIFIER
@@ -245,25 +245,36 @@ def has_content(byte_array):
     return True
 
 
-def iterkeys(d):
+def iterkeys(dictionary):
     """Python 2/3 compatibility function for dict.iterkeys()"""
     if sys.version_info > (3, 0):
-        return d.keys()
+        return dictionary.keys()
     else:
-        return d.iterkeys()
+        return dictionary.iterkeys()
 
 
-def itervalues(d):
+def itervalues(dictionary):
     """Python 2/3 compatibility function for dict.itervalues()"""
     if sys.version_info > (3, 0):
-        return d.values()
+        return dictionary.values()
     else:
-        return d.itervalues()
+        return dictionary.itervalues()
 
 
-def iteritems(d):
+def iteritems(dictionary):
     """Python 2/3 compatibility function for dict.iteritems()"""
     if sys.version_info > (3, 0):
-        return d.items()
+        return dictionary.items()
     else:
-        return d.iteritems()
+        return dictionary.iteritems()
+
+
+def xdecode(string, format_string=UTF_8, override=None):
+    """Python 2/3 compatibility function for str.decode()"""
+    if sys.version_info > (3, 0):
+        return string
+    else:
+        if override:
+            return string.decode(format_string, override)
+        else:
+            return string.decode(format_string)
