@@ -29,7 +29,7 @@ from sqlite_dissect.constants import VALID_SCHEMA_FORMATS
 from sqlite_dissect.constants import WAL_JOURNALING_MODE
 from sqlite_dissect.exception import HeaderParsingError
 from sqlite_dissect.file.header import SQLiteHeader
-from sqlite_dissect.utilities import get_md5_hash
+from sqlite_dissect.utilities import get_md5_hash, xdecode
 
 """
 
@@ -66,7 +66,7 @@ class DatabaseHeader(SQLiteHeader):
             logger.error("Failed to retrieve the magic header.")
             raise
 
-        if self.magic_header_string != MAGIC_HEADER_STRING.decode(MAGIC_HEADER_STRING_ENCODING):
+        if self.magic_header_string != xdecode(MAGIC_HEADER_STRING, MAGIC_HEADER_STRING_ENCODING):
             log_message = "The magic header string is invalid."
             logger.error(log_message)
             raise HeaderParsingError(log_message)
@@ -258,7 +258,7 @@ class DatabaseHeader(SQLiteHeader):
         self.reserved_for_expansion = database_header_byte_array[72:92]
 
         pattern = compile(RESERVED_FOR_EXPANSION_REGEX)
-        reserved_for_expansion_hex = hexlify(self.reserved_for_expansion)
+        reserved_for_expansion_hex = hexlify(self.reserved_for_expansion).decode('utf-8')
         if not pattern.match(reserved_for_expansion_hex):
             log_message = "Header space reserved for expansion is not zero: {}.".format(reserved_for_expansion_hex)
             logger.error(log_message)

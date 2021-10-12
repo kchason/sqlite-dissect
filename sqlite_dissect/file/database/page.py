@@ -609,7 +609,7 @@ class BTreePage(Page):
         else:
             log_message = "Page hex type: {} is not a valid b-tree page type for b-tree page: {} in page version: {} " \
                           "for version: {}."
-            log_message = log_message.format(hexlify(self.hex_type), self.number, self.page_version_number,
+            log_message = log_message.format(hexlify(bytes(self.hex_type)), self.number, self.page_version_number,
                                              self.version_number)
             self._logger.error(log_message)
             raise BTreePageParsingError(log_message)
