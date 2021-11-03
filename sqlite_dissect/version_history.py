@@ -310,14 +310,12 @@ class VersionHistoryParser(VersionParser):
         elif self._virtual_table:
 
             """
-
             In the case this is a virtual table, we check to see if the root page is 0.  Additional use cases
             handling for virtual tables needs to be investigated.  For now, if a virtual table exists with a 
             root page of 0 we do not iterate through it and return a StopIteration() since we do not have anything
             to iterate.  We do throw a warning here (again) for informative purposes.
 
             Note:  If all root page numbers in the root page number version index are not 0, an exception is raised.
-
             """
 
             # Check to make sure all root page numbers are 0 as should be with virtual tables.
@@ -339,7 +337,7 @@ class VersionHistoryParser(VersionParser):
                           "is no content."
             log_message = log_message.format(self.name, self.table_name, self.row_type, self.sql,
                                              self.parser_starting_version_number, self.parser_ending_version_number)
-            getLogger(LOGGER_NAME).warn(log_message)
+            getLogger(LOGGER_NAME).warning(log_message)
             warn(log_message, RuntimeWarning)
 
             # Return an empty iterator
@@ -398,6 +396,9 @@ class VersionHistoryParser(VersionParser):
 
         def __iter__(self):
             return self
+
+        def __next__(self):
+            return self.next()
 
         def __repr__(self):
             return self.__str__().encode("hex")

@@ -1,3 +1,4 @@
+import binascii
 import sys
 from binascii import hexlify
 from hashlib import md5
@@ -132,7 +133,7 @@ def get_class_instance(class_name):
 
 def get_md5_hash(string):
     md5_hash = md5()
-    md5_hash.update(string)
+    md5_hash.update(encode_str(string))
     return md5_hash.hexdigest().upper()
 
 
@@ -155,7 +156,7 @@ def get_record_content(serial_type, record_body, offset=0):
     # Big-endian 24-bit twos-complement integer
     elif serial_type == 3:
         content_size = 3
-        value_byte_array = '\0' + record_body[offset:offset + content_size]
+        value_byte_array = b'\0' + record_body[offset:offset + content_size]
         value = unpack(b">I", value_byte_array)[0]
         if value & 0x800000:
             value -= 0x1000000
@@ -168,7 +169,7 @@ def get_record_content(serial_type, record_body, offset=0):
     # Big-endian 48-bit twos-complement integer
     elif serial_type == 5:
         content_size = 6
-        value_byte_array = '\0' + '\0' + record_body[offset:offset + content_size]
+        value_byte_array = b'\0' + b'\0' + record_body[offset:offset + content_size]
         value = unpack(b">Q", value_byte_array)[0]
         if value & 0x800000000000:
             value -= 0x1000000000000
@@ -204,7 +205,7 @@ def get_record_content(serial_type, record_body, offset=0):
 
     # A string in the database encoding and is (N-13)/2 bytes in length.  The nul terminator is omitted
     elif serial_type >= 13 and serial_type % 2 == 1:
-        content_size = (serial_type - 13) / 2
+        content_size = int((serial_type - 13) / 2)
         value = record_body[offset:offset + content_size]
 
     else:
@@ -269,6 +270,22 @@ def iteritems(dictionary):
         return dictionary.iteritems()
 
 
+def encode_str(string):
+    """Python 2/3 compatibility for detecting unencoded strings and encoding them"""
+    if isinstance(string, str):
+        return string.encode()
+    else:
+        return string
+
+
+def decode_str(string):
+    """Python 2/3 compatibility for detecting unencoded strings and encoding them"""
+    if isinstance(string, bytes):
+        return string.decode()
+    else:
+        return string
+
+
 def xdecode(string, format_string=UTF_8, override=None):
     """Python 2/3 compatibility function for str.decode()"""
     if sys.version_info > (3, 0):
@@ -278,3 +295,30 @@ def xdecode(string, format_string=UTF_8, override=None):
             return string.decode(format_string, override)
         else:
             return string.decode(format_string)
+
+
+def int_to_bytes(number):
+    """Checks if the argument is of type 'int' and converts it to bytes as needed"""
+    if isinstance(number, int):
+        if sys.version_info > (3, 0):
+            return bytes([number])
+        else:
+            return str(number)
+    else:
+        return number
+
+
+def xhex(number):
+    """Python 2/3 compatibility function for hex()"""
+    if sys.version_info > (3, 0):
+        return hex(number)
+    else:
+        return binascii.hexlify(number)
+
+
+def xmap(func, items):
+    """Python 2/3 compatibility function to consistently return a list of mapped items"""
+    if sys.version_info > (3, 0):
+        return list(map(func, items))
+    else:
+        return map(func, items)

@@ -35,6 +35,7 @@ from sqlite_dissect.file.schema.master import OrdinaryTableRow
 from sqlite_dissect.file.wal.wal import WriteAheadLog
 from sqlite_dissect.output import stringify_master_schema_version
 from sqlite_dissect.output import stringify_master_schema_versions
+from sqlite_dissect.utilities import xmap
 from sqlite_dissect.version_history import VersionHistory
 from sqlite_dissect.version_history import VersionHistoryParser
 
@@ -108,7 +109,7 @@ def main(args):
     # Setup the export type
     export_types = [EXPORT_TYPES.TEXT]
     if args.export and len(export_types) > 0:
-        export_types = map(str.upper, args.export)
+        export_types = xmap(str.upper, args.export)
 
     # Setup the strict format checking
     strict_format_checking = True
