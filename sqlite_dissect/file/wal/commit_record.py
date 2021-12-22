@@ -100,7 +100,7 @@ class WriteAheadLogCommitRecord(Version):
 
         self._database = database
 
-        for page_version_number in page_version_index.itervalues():
+        for page_version_number in page_version_index.values():
             if page_version_number >= version_number:
                 log_message = "Page version number: {} is greater than the commit record specified version: {}."
                 log_message = log_message.format(page_version_number, version_number)
@@ -648,7 +648,7 @@ class WriteAheadLogCommitRecord(Version):
         string += "\n" + padding + "Database Header Differences:"
 
         # Parse the database header differences
-        for field, difference in self.database_header_differences.iteritems():
+        for field, difference in self.database_header_differences.items():
             difference_string = "\n" + padding + "\t" + "Field: {} changed from previous Value: {} to new Value: {}"
             string += difference_string.format(field, difference[0], difference[1])
 

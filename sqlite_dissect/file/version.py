@@ -182,7 +182,7 @@ class Version(object):
                                self.pointer_map_pages_modified,
                                self.updated_b_tree_page_numbers)
         if print_pages:
-            for page in self.pages.itervalues():
+            for page in self.pages.values():
                 string += "\n" + padding + "Page:\n{}".format(page.stringify(padding + "\t"))
         if print_schema:
             string += "\n" \

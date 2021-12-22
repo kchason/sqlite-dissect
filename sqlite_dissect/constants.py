@@ -1,4 +1,4 @@
-from collections import MutableMapping
+from collections.abc import MutableMapping
 from logging import getLogger
 from re import compile
 from sys import maxunicode
@@ -79,7 +79,7 @@ LOCK_BYTE_PAGE_START_OFFSET = 1073741824
 LOCK_BYTE_PAGE_END_OFFSET = 1073742336
 
 SQLITE_DATABASE_HEADER_LENGTH = 100
-MAGIC_HEADER_STRING = "SQLite format 3\000"
+MAGIC_HEADER_STRING = b'SQLite format 3\000'
 MAGIC_HEADER_STRING_ENCODING = UTF_8
 MAXIMUM_PAGE_SIZE_INDICATOR = 1
 MINIMUM_PAGE_SIZE_LIMIT = 512
@@ -284,5 +284,5 @@ if maxunicode >= 0x10000:
                                     (0xDFFFE, 0xDFFFF), (0xEFFFE, 0xEFFFF), (0xFFFFE, 0xFFFFF),
                                     (0x10FFFE, 0x10FFFF)])
 
-_illegal_xml_ranges = ["%s-%s" % (unichr(low), unichr(high)) for (low, high) in _illegal_xml_characters]
+_illegal_xml_ranges = ["%s-%s" % (chr(low), chr(high)) for (low, high) in _illegal_xml_characters]
 ILLEGAL_XML_CHARACTER_PATTERN = compile(u'[%s]' % u''.join(_illegal_xml_ranges))

@@ -298,14 +298,14 @@ class CommitSqliteExporter(object):
                algorithm internal to SQLite to slightly change.  Despite this, we make the following modifications in
                order to best ensure data integrity when writing the data back to the SQLite file:
                1.) If the value is a bytearray, the value is interpreted as a blob object.  In order to write this
-                   back correctly, we set it to buffer(value) in order to write it back to the SQLite database as
+                   back correctly, we set it to memoryview(value) in order to write it back to the SQLite database as
                    a blob object.  Before we write it back, we make sure that the object does not have text affinity,
                    or if it does we decode it in the database text encoding before writing it.
                2.) If the value is a string, we encode it using UTF-8.  If this fails, that means it had characters
                    not supported by the unicode encoding which caused it to fail.  Since we are writing back carved
                    records that may have invalid characters in strings due to parts being overwritten or false
                    positives, this can occur a lot.  Therefore, if the unicode encoding fails, we do the same
-                   as above for blob objects and create a buffer(value) blob object and write that back to the
+                   as above for blob objects and create a memoryview(value) blob object and write that back to the
                    database in order to maintain the original data.  Therefore, in some tables, depending on the
                    data parsed or strings retrieved may be stored in either a string (text) or blob storage class.
                3.) If the value does not fall in one of the above use cases, we leave it as is and write it back to the
@@ -354,13 +354,13 @@ class CommitSqliteExporter(object):
                         if text_affinity:
                             value = value.decode(database_text_encoding, "replace")
                         else:
-                            value = buffer(value)
+                            value = memoryview(value)
                     elif isinstance(value, str):
                         try:
                             if text_affinity:
                                 value = value.decode(database_text_encoding, "replace")
                             else:
-                                value = buffer(value)
+                                value = memoryview(value)
                         except UnicodeDecodeError:
 
                             """
@@ -374,7 +374,7 @@ class CommitSqliteExporter(object):
 
                             """
 
-                            value = buffer(value)
+                            value = memoryview(value)
 
                     cell_record_column_values.append(value)
 

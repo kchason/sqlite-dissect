@@ -47,7 +47,7 @@ def decode_varint(byte_array, offset=0):
     unsigned_integer_value = 0
     varint_relative_offset = 0
 
-    for x in xrange(1, 10):
+    for x in range(1, 10):
 
         varint_byte = ord(byte_array[offset + varint_relative_offset:offset + varint_relative_offset + 1])
         varint_relative_offset += 1
@@ -90,7 +90,7 @@ def encode_varint(value):
         byte_array.insert(0, pack("B", byte))
         value >>= 8
 
-        for _ in xrange(8):
+        for _ in range(8):
             byte_array.insert(0, pack("B", (value & 0x7f) | 0x80))
             value >>= 7
 
@@ -152,7 +152,7 @@ def get_record_content(serial_type, record_body, offset=0):
     # Big-endian 24-bit twos-complement integer
     elif serial_type == 3:
         content_size = 3
-        value_byte_array = '\0' + record_body[offset:offset + content_size]
+        value_byte_array = b'\0' + record_body[offset:offset + content_size]
         value = unpack(b">I", value_byte_array)[0]
         if value & 0x800000:
             value -= 0x1000000
@@ -165,7 +165,7 @@ def get_record_content(serial_type, record_body, offset=0):
     # Big-endian 48-bit twos-complement integer
     elif serial_type == 5:
         content_size = 6
-        value_byte_array = '\0' + '\0' + record_body[offset:offset + content_size]
+        value_byte_array = b'\0' + b'\0' + record_body[offset:offset + content_size]
         value = unpack(b">Q", value_byte_array)[0]
         if value & 0x800000000000:
             value -= 0x1000000000000

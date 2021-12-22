@@ -417,7 +417,7 @@ class VersionHistoryParser(VersionParser):
                                    self._current_b_tree_page_numbers,
                                    self._carve_freelist_pages)
             if print_cells:
-                for current_cell in self._current_cells.itervalues():
+                for current_cell in self._current_cells.values():
                     string += "\n" + padding + "Cell:\n{}".format(current_cell.stringify(padding + "\t"))
             return string
 
@@ -501,7 +501,7 @@ class VersionHistoryParser(VersionParser):
                     deleted_cells = {}
 
                     # Iterate through the current cells
-                    for current_cell_md5, current_cell in self._current_cells.iteritems():
+                    for current_cell_md5, current_cell in self._current_cells.items():
 
                         # Remove the cell from the added cells if it was already pre-existing
                         if current_cell_md5 in added_cells:
@@ -694,7 +694,7 @@ class VersionHistoryParser(VersionParser):
                             # Initialize the carved cells
                             carved_cells = []
 
-                            for freelist_page_number, freelist_page in updated_freelist_pages.iteritems():
+                            for freelist_page_number, freelist_page in updated_freelist_pages.items():
 
                                 # Carve unallocated space
                                 carvings = SignatureCarver.carve_unallocated_space(version, CELL_SOURCE.FREELIST,
@@ -798,13 +798,13 @@ class Commit(object):
                                self.freelist_pages_carved,
                                self.updated_freelist_page_numbers)
         if print_cells:
-            for added_cell in self.added_cells.itervalues():
+            for added_cell in self.added_cells.values():
                 string += "\n" + padding + "Added Cell:\n{}".format(added_cell.stringify(padding + "\t"))
-            for deleted_cell in self.deleted_cells.itervalues():
+            for deleted_cell in self.deleted_cells.values():
                 string += "\n" + padding + "Deleted Cell:\n{}".format(deleted_cell.stringify(padding + "\t"))
-            for updated_cell in self.updated_cells.itervalues():
+            for updated_cell in self.updated_cells.values():
                 string += "\n" + padding + "Updated Cell:\n{}".format(updated_cell.stringify(padding + "\t"))
-            for carved_cell in self.carved_cells.itervalues():
+            for carved_cell in self.carved_cells.values():
                 string += "\n" + padding + "Carved Cell:\n{}".format(carved_cell.stringify(padding + "\t"))
         return string
 

@@ -376,9 +376,9 @@ def get_content_size(serial_type):
     elif serial_type >= 12 and serial_type % 2 == 0:
         return (serial_type - 12) / 2
 
-    # A string in the database encoding and is (N-13)/2 bytes in length.  The nul terminator is omitted
+    # A string in the database encoding and is (N-13)/2 bytes in length.  The null terminator is omitted
     elif serial_type >= 13 and serial_type % 2 == 1:
-        return (serial_type - 13) / 2
+        return int((serial_type - 13) / 2)
 
     else:
         log_message = "Invalid serial type: {}."

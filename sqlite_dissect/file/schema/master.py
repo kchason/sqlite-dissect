@@ -422,7 +422,7 @@ class MasterSchema(object):
                 logger.error(log_message)
                 raise MasterSchemaParsingError(log_message)
 
-            for row_type, row_type_data in returned_master_schema_entry_data.iteritems():
+            for row_type, row_type_data in returned_master_schema_entry_data.items():
                 if row_type in master_schema_entry_data:
                     master_schema_entry_data[row_type].extend(row_type_data)
                 else:
@@ -629,7 +629,7 @@ class MasterSchemaRow(object):
         for comment in self.comments:
             string += "\n" + padding + "Comment: {}".format(comment)
         if print_record_columns:
-            for index, record_column in self.record_columns.iteritems():
+            for index, record_column in self.record_columns.items():
                 string += "\n" \
                           + padding + "Record Column {}:\n{}:".format(index, record_column.stringify(padding + "\t"))
         return string
