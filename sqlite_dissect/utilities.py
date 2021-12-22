@@ -199,7 +199,7 @@ def get_record_content(serial_type, record_body, offset=0):
 
     # A BLOB that is (N-12)/2 bytes in length
     elif serial_type >= 12 and serial_type % 2 == 0:
-        content_size = (serial_type - 12) / 2
+        content_size = int((serial_type - 12) / 2)
         value = record_body[offset:offset + content_size]
 
     # A string in the database encoding and is (N-13)/2 bytes in length.  The nul terminator is omitted
