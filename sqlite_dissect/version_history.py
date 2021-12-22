@@ -190,7 +190,7 @@ class VersionHistory(object):
                 log_message = "Version (commit record): {} has additional frames beyond the last commit frame found " \
                               "in the write ahead log and erroneous use cases may occur when parsing."
                 log_message = log_message.format(commit_record_number)
-                logger.warn(log_message)
+                logger.warning(log_message)
                 warn(log_message, RuntimeWarning)
 
         # Set the number of versions
@@ -398,6 +398,9 @@ class VersionHistoryParser(VersionParser):
 
         def __repr__(self):
             return self.__str__().encode("hex")
+
+        def __next__(self):
+            return self.next()
 
         def __str__(self):
             return sub("\t", "", sub("\n", " ", self.stringify()))

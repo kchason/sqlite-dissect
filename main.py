@@ -108,7 +108,7 @@ def main(args):
     # Setup the export type
     export_types = [EXPORT_TYPES.TEXT]
     if args.export and len(export_types) > 0:
-        export_types = map(str.upper, args.export)
+        export_types = list(map(str.upper, args.export))
 
     # Setup the strict format checking
     strict_format_checking = True

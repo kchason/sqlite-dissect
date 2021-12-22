@@ -129,6 +129,9 @@ def get_class_instance(class_name):
 
 def get_md5_hash(string):
     md5_hash = md5()
+    # Ensure the string is properly encoded as a binary string
+    if isinstance(string, str):
+        string = string.encode()
     md5_hash.update(string)
     return md5_hash.hexdigest().upper()
 
@@ -201,7 +204,7 @@ def get_record_content(serial_type, record_body, offset=0):
 
     # A string in the database encoding and is (N-13)/2 bytes in length.  The nul terminator is omitted
     elif serial_type >= 13 and serial_type % 2 == 1:
-        content_size = (serial_type - 13) / 2
+        content_size = int((serial_type - 13) / 2)
         value = record_body[offset:offset + content_size]
 
     else:
@@ -227,3 +230,11 @@ def has_content(byte_array):
     if pattern.match(hexlify(byte_array)):
         return False
     return True
+
+
+def decode_str(string):
+    """Python compatibility for auto-detecting encoded strings and decoding them"""
+    if isinstance(string, bytes):
+        return string.decode()
+    else:
+        return string

@@ -9,7 +9,7 @@ from sqlite_dissect.file.database.page import IndexLeafPage
 from sqlite_dissect.file.database.page import TableInteriorPage
 from sqlite_dissect.file.database.page import TableLeafPage
 from sqlite_dissect.exception import OutputError
-from sqlite_dissect.utilities import has_content
+from sqlite_dissect.utilities import has_content, decode_str
 
 """
 
@@ -146,7 +146,8 @@ def stringify_cell_record(cell, database_text_encoding, page_type):
                     column_values.append(str(value))
             else:
                 column_values.append("NULL")
-        content = "(" + ", ".join(column_values) + ")"
+
+        content = "(" + ", ".join(list(map(decode_str, column_values))) + ")"
         return "#{}: {}".format(cell.row_id, content)
 
     elif page_type == PAGE_TYPE.B_TREE_INDEX_LEAF:
