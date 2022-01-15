@@ -44,11 +44,15 @@ setup(name="sqlite_dissect",
                 "sqlite_dissect.carving",
                 "sqlite_dissect.export"],
       classifiers=[
-          "Programming Language :: Python :: 2",
-          "Programming Language :: Python :: 2.7"
+          "Programming Language :: Python :: 3",
+          "Programming Language :: Python :: 3.6"
+          "Programming Language :: Python :: 3.7"
+          "Programming Language :: Python :: 3.8"
+          "Programming Language :: Python :: 3.9"
+          "Programming Language :: Python :: 3.10"
       ],
       install_requires=[
-          "openpyxl==2.6.4"
+          "openpyxl==3.0.9"
       ],
       zip_safe=False
       )

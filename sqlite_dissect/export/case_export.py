@@ -3,6 +3,7 @@ import json
 import uuid
 from datetime import datetime
 from os import path
+from typing import Optional
 
 from _version import __version__
 
@@ -30,15 +31,25 @@ def hash_file(file_path: str, hash_algo=hashlib.sha256()) -> str:
     return hash_algo.hexdigest()
 
 
+def guid_list_to_objects(guids: list) -> list:
+    """
+    Converts a list of string GUIDs to the object notation with an ID prefix
+    """
+    if guids is None:
+        return []
+    else:
+        return list(map(lambda g: {"@id": g}, guids))
+
+
 class CaseExporter(object):
     # Define the formatted logger that is provided by the main.py execution path
     logger = None
 
-    result_guids = []
+    result_guids: list = []
 
     # Defines the initial structure for the CASE export. This will be supplemented with various methods that get called
     # from the main.py execution path.
-    case = {
+    case: dict = {
         '@context': {
             "@vocab": "http://example.org/ontology/local#",
             "case-investigation": "https://ontology.caseontology.org/case/investigation/",
@@ -64,7 +75,7 @@ class CaseExporter(object):
     def __init__(self, logger):
         self.logger = logger
 
-    def register_options(self, options):
+    def register_options(self, options: list):
         """
         Adds the command line options provided as the configuration values provided and outputting them in the schema
         defined in the uco-tool namespace.
@@ -93,7 +104,7 @@ class CaseExporter(object):
         # Add the configuration facet to the in progress CASE object
         self.case['@graph'][0]['uco-core:hasFacet'] = configuration
 
-    def add_observable_file(self, filepath, filetype=None):
+    def add_observable_file(self, filepath: str, filetype: str = None) -> Optional[str]:
         """
         Adds the file specified in the provided filepath as an ObservableObject in the CASE export. This method handles
         calculation of filesize, extension, MD5 hash, SHA1 hash, and other metadata expected in the Observable TTL spec.
@@ -196,8 +207,9 @@ class CaseExporter(object):
             return guid
         else:
             self.logger.critical('Attempting to add invalid filepath to CASE Observable export: {}'.format(filepath))
+            return None
 
-    def link_observable_relationship(self, source_guid, target_guid, relationship):
+    def link_observable_relationship(self, source_guid: str, target_guid: str, relationship: str) -> None:
         self.case['@graph'].append({
             "@id": ("kb:export-artifact-relationship-" + str(uuid.uuid4())),
             "@type": "uco-observable:ObservableRelationship",
@@ -214,7 +226,7 @@ class CaseExporter(object):
             "uco-core:isDirectional": True
         })
 
-    def add_export_artifacts(self, export_paths=None):
+    def add_export_artifacts(self, export_paths: list = None):
         """
         Loops through the list of provided export artifact paths and adds them as observables and links them to the
         original observable artifact
@@ -228,7 +240,7 @@ class CaseExporter(object):
             # Add the export result GUID to the list to be extracted
             self.result_guids.append(export_guid)
 
-    def generate_provenance_record(self, description, guids):
+    def generate_provenance_record(self, description: str, guids: list) -> Optional[str]:
         """
         Generates a provenance record for the tool and returns the GUID for the new object
         """
@@ -242,14 +254,14 @@ class CaseExporter(object):
                 "@id": guid,
                 "@type": "case-investigation:ProvenanceRecord",
                 "uco-core:description": description,
-                "uco-core:object": self.guid_list_to_objects(guids)
+                "uco-core:object": guid_list_to_objects(guids)
             }
             self.case['@graph'].append(record)
             return guid
         else:
             return None
 
-    def generate_header(self):
+    def generate_header(self) -> str:
         """
         Generates the header for the tool and returns the GUID for the ObservableRelationships
         """
@@ -270,7 +282,7 @@ class CaseExporter(object):
 
         return guid
 
-    def generate_investigation_action(self, source_guids):
+    def generate_investigation_action(self, source_guids: list):
         """
         Builds the investigative action object as defined in the CASE ontology. This also takes in the start and end
         datetimes from the analysis.
@@ -303,13 +315,13 @@ class CaseExporter(object):
         # Loop through and add the results to the ActionReferencesFacet
         action_facet = {
             "@type": "uco-action:ActionReferencesFacet",
-            "uco-action:object": self.guid_list_to_objects(source_guids),
-            "uco-action:result": self.guid_list_to_objects(self.result_guids)
+            "uco-action:object": guid_list_to_objects(source_guids),
+            "uco-action:result": guid_list_to_objects(self.result_guids)
         }
         action["uco-core:hasFacet"].append(action_facet)
         self.case['@graph'].append(action)
 
-    def export_case_file(self, export_path='output/case.json'):
+    def export_case_file(self, export_path: str = 'output/case.json'):
         """
         Exports the built CASE object to the path specified in the export_path parameter.
         """
@@ -318,12 +330,3 @@ class CaseExporter(object):
         with open(export_path, 'w') as f:
             json.dump(self.case, f, ensure_ascii=False, indent=4)
             self.logger.info('CASE formatted file has been exported to {}'.format(export_path))
-
-    def guid_list_to_objects(self, guids):
-        """
-        Converts a list of string GUIDs to the object notation with an ID prefix
-        """
-        if guids is None:
-            return []
-        else:
-            return list(map(lambda g: {"@id": g}, guids))

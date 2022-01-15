@@ -3,8 +3,8 @@
 
 _version.py
 
-This script identifies the version of the sqlite dissect library.
+This script identifies the version of the SQLite Dissect library.
 
 """
 
-__version__ = "0.0.6"
+__version__ = "0.2.0"
