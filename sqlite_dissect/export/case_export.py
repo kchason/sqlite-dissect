@@ -12,6 +12,24 @@ Information about the CASE Cyber Ontology can be found at: https://caseontology.
 """
 
 
+def hash_file(file_path: str, hash_algo=hashlib.sha256()) -> str:
+    """
+    Generates a hash of a file by chunking it and utilizing the Python hashlib library.
+    """
+    # Ensure the file path exists
+    if not path.exists(file_path):
+        raise FileNotFoundError(f'The file path {file_path} is not valid, the file does not exist')
+
+    with open(file_path, 'rb') as file:
+        while True:
+            # Reading is buffered, so we can read smaller chunks.
+            chunk = file.read(hash_algo.block_size)
+            if not chunk:
+                break
+            hash_algo.update(chunk)
+    return hash_algo.hexdigest()
+
+
 class CaseExporter(object):
     # Define the formatted logger that is provided by the main.py execution path
     logger = None
@@ -134,7 +152,7 @@ class CaseExporter(object):
                                 },
                                 "uco-types:hashValue": {
                                     "@type": "xsd:hexBinary",
-                                    "@value": hashlib.md5(filepath).hexdigest()
+                                    "@value": hash_file(filepath, hashlib.md5())
                                 }
                             },
                             {
@@ -145,7 +163,7 @@ class CaseExporter(object):
                                 },
                                 "uco-types:hashValue": {
                                     "@type": "xsd:hexBinary",
-                                    "@value": hashlib.sha1(filepath).hexdigest()
+                                    "@value": hash_file(filepath, hashlib.sha1())
                                 }
                             },
                             {
@@ -156,7 +174,7 @@ class CaseExporter(object):
                                 },
                                 "uco-types:hashValue": {
                                     "@type": "xsd:hexBinary",
-                                    "@value": hashlib.sha256(filepath).hexdigest()
+                                    "@value": hash_file(filepath, hashlib.sha256())
                                 }
                             },
                             {
@@ -167,7 +185,7 @@ class CaseExporter(object):
                                 },
                                 "uco-types:hashValue": {
                                     "@type": "xsd:hexBinary",
-                                    "@value": hashlib.sha512(filepath).hexdigest()
+                                    "@value": hash_file(filepath, hashlib.sha512())
                                 }
                             }
                         ]
