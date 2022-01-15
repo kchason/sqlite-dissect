@@ -56,7 +56,6 @@ TriggerRow(MasterSchemaRow)
 
 
 class MasterSchema(object):
-
     MasterSchemaEntryData = namedtuple("MasterSchemaEntryData",
                                        "record_columns row_type sql b_tree_table_leaf_page_number cell")
 
@@ -470,7 +469,6 @@ class MasterSchema(object):
 
 
 class MasterSchemaRow(object):
-
     __metaclass__ = ABCMeta
 
     @abstractmethod
@@ -677,7 +675,7 @@ class MasterSchemaRow(object):
         if remaining_sql_command[0] == "[":
 
             # The table name or index name is surrounded by brackets
-            match_object = match("^\[(.*?)\]", remaining_sql_command)
+            match_object = match(r"^\[(.*?)\]", remaining_sql_command)
 
             if not match_object:
                 log_message = "No bracket match found for {} name in sql for {} row name: {} and sql: {}."
@@ -784,7 +782,6 @@ class MasterSchemaRow(object):
                     # Check to make sure the full comment indicators were found for "--" and "/*"
                     if (character == '-' and remaining_sql_command[index + 1] != '-') or \
                             (character == '/' and remaining_sql_command[index + 1] != '*'):
-
                         log_message = "Comment indicator '{}' found followed by an invalid secondary comment " \
                                       "indicator: {} found in {} name in sql for {} row name: {} and sql: {}."
                         log_message = log_message.format(character, remaining_sql_command[index + 1],
@@ -1417,7 +1414,7 @@ class OrdinaryTableRow(TableRow):
                         Note: When the check is done on the definition, we check the next character is not one of the
                               allowed characters in a column name to make sure the constraint preface is not the
                               beginning of a longer column name where it is not actually a constraint preface
-                              (example: primaryEmail).  The "\w" regular expression when no LOCALE and UNICODE flags
+                              (example: primaryEmail).  The r'\w' regular expression when no LOCALE and UNICODE flags
                               are set will be equivalent to the set: [a-zA-Z0-9_].
 
                         """
@@ -1426,7 +1423,7 @@ class OrdinaryTableRow(TableRow):
                         if definition[:len(table_constraint_preface)].upper() == table_constraint_preface:
 
                             if not (len(table_constraint_preface) + 1 <= len(definition)
-                                    and match("\w", definition[len(table_constraint_preface)])):
+                                    and match(r"\w", definition[len(table_constraint_preface)])):
 
                                 # We have found a table constraint here and make sure this is not the first definition
                                 if definition_index == 0:
@@ -2297,7 +2294,6 @@ class ViewRow(MasterSchemaRow):
 
     def __init__(self, version_interface, b_tree_table_leaf_page_number,
                  b_tree_table_leaf_cell, record_columns, tables):
-
         super(ViewRow, self).__init__(version_interface, b_tree_table_leaf_page_number,
                                       b_tree_table_leaf_cell, record_columns)
 
@@ -2314,7 +2310,6 @@ class TriggerRow(MasterSchemaRow):
 
     def __init__(self, version_interface, b_tree_table_leaf_page_number,
                  b_tree_table_leaf_cell, record_columns, tables, views):
-
         super(TriggerRow, self).__init__(version_interface, b_tree_table_leaf_page_number,
                                          b_tree_table_leaf_cell, record_columns)
 
