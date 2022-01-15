@@ -282,7 +282,7 @@ class CaseExporter(object):
 
         return guid
 
-    def generate_investigation_action(self, source_guids: list):
+    def generate_investigation_action(self, source_guids: list, tool_guid: str):
         """
         Builds the investigative action object as defined in the CASE ontology. This also takes in the start and end
         datetimes from the analysis.
@@ -315,6 +315,7 @@ class CaseExporter(object):
         # Loop through and add the results to the ActionReferencesFacet
         action_facet = {
             "@type": "uco-action:ActionReferencesFacet",
+            "uco-action:instrument": tool_guid,
             "uco-action:object": guid_list_to_objects(source_guids),
             "uco-action:result": guid_list_to_objects(self.result_guids)
         }
