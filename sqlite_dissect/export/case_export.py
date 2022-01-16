@@ -315,7 +315,7 @@ class CaseExporter(object):
         # Loop through and add the results to the ActionReferencesFacet
         action_facet = {
             "@type": "uco-action:ActionReferencesFacet",
-            "uco-action:instrument": tool_guid,
+            "uco-action:instrument": guid_list_to_objects([tool_guid]),
             "uco-action:object": guid_list_to_objects(source_guids),
             "uco-action:result": guid_list_to_objects(self.result_guids)
         }
