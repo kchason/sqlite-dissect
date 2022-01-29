@@ -41,10 +41,14 @@ jobs:
       # Test the Python unit tests
       - name: PyTest
         run: |
+          # Install badge dependencies
+          pip install genbadge[all]
           # Create the directory for the test output
           mkdir output
           # Run the test suite
-          pytest --cov-report term-missing --cov-report html --cov=sqlite_dissect --cov-config=.coveragerc
+          pytest --cov-report term-missing --cov-report html --cov=sqlite_dissect --cov-config=.coveragerc --junitxml=reports/junit/junit.xml
+          # Generate the badges
+          genbadge tests
 
       # Run the CASE validation job to confirm the output is valid
       - name: CASE Export Validation
