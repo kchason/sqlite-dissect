@@ -582,10 +582,10 @@ class BTreePage(Page):
         page = self._version_interface.get_page_data(self.number)
 
         self.page_type = None
-        self.hex_type = page[0]
+        self.hex_type = chr(page[0]).encode()
 
         if self.hex_type == MASTER_PAGE_HEX_ID:
-            master_page_hex_type = page[SQLITE_DATABASE_HEADER_LENGTH]
+            master_page_hex_type = chr(page[SQLITE_DATABASE_HEADER_LENGTH]).encode()
             if master_page_hex_type == TABLE_INTERIOR_PAGE_HEX_ID:
                 self.page_type = PAGE_TYPE.B_TREE_TABLE_INTERIOR
             elif master_page_hex_type == TABLE_LEAF_PAGE_HEX_ID:
@@ -593,7 +593,7 @@ class BTreePage(Page):
             else:
                 log_message = "Page hex type for master page is: {} and not a table interior or table leaf page as " \
                               "expected in b-tree page: {} in page version: {} for version: {}."
-                log_message = log_message.format(hexlify(master_page_hex_type), self.number,
+                log_message = log_message.format(hex(master_page_hex_type), self.number,
                                                  self.page_version_number, self.version_number)
                 self._logger.error(log_message)
                 raise BTreePageParsingError(log_message)
@@ -609,7 +609,7 @@ class BTreePage(Page):
         else:
             log_message = "Page hex type: {} is not a valid b-tree page type for b-tree page: {} in page version: {} " \
                           "for version: {}."
-            log_message = log_message.format(hexlify(self.hex_type), self.number, self.page_version_number,
+            log_message = log_message.format(hex(self.hex_type), self.number, self.page_version_number,
                                              self.version_number)
             self._logger.error(log_message)
             raise BTreePageParsingError(log_message)

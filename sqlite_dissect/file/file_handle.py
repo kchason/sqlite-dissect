@@ -68,7 +68,8 @@ class FileHandle(object):
         self.file_externally_controlled = False
         self._database_text_encoding = database_text_encoding
 
-        if isinstance(file_identifier, basestring):
+        xbasestring = (str, bytes)
+        if isinstance(file_identifier, xbasestring):
 
             """
 

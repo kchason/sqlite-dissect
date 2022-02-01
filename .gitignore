@@ -24,6 +24,8 @@
 # Other
 /output
 /log
+
+# PyTest and Coverage
 /case
 /.pytest_cache
 /.coverage

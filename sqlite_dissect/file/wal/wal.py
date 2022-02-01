@@ -232,9 +232,9 @@ class WriteAheadLog(object):
                                self.invalid_frame_indices,
                                self.last_frame_commit_record.frame_index + 1)
         if print_frames:
-            for frame in self.frames.itervalues():
+            for frame in self.frames.values():
                 string += "\n" + padding + "Frame:\n{}".format(frame.stringify(padding + "\t"))
         if print_frames and self.invalid_frames:
-            for invalid_frame in self.invalid_frames.itervalues():
+            for invalid_frame in self.invalid_frames.values():
                 string += "\n" + padding + "Invalid Frame:\n{}".format(invalid_frame.stringify(padding + "\t"))
         return string
