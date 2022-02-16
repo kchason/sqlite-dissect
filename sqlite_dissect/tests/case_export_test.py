@@ -30,7 +30,7 @@ class TestCASEExport(unittest.TestCase):
         args = DotDict(args)
 
         # Call the main argument
-        main(args)
+        main(args, input_path)
 
         # Ensure the case.json file exists
         self.assertTrue(os.path.exists(case_path))
