@@ -7,6 +7,10 @@ the associated journal files. If they are not in the same directory as the speci
 their location will need to be specified in the command. SQLite carving will not be done by default. See the full
 command line options to enable carving.
 
+SQLite Dissect is primarily developed and maintained by `Department of Defense Cyber Crime Center (DC3) <https://www.dc3.mil/>`_
+with support from open-source contributors. The tool is hosted on GitHub at
+`https://github.com/Defense-Cyber-Crime-Center/sqlite-dissect <https://github.com/Defense-Cyber-Crime-Center/sqlite-dissect>`_.
+
 .. toctree::
    :maxdepth: 2
 
