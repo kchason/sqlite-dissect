@@ -8,8 +8,10 @@ their location will need to be specified in the command. SQLite carving will not
 command line options to enable carving.
 
 SQLite Dissect is primarily developed and maintained by `Department of Defense Cyber Crime Center (DC3) <https://www.dc3.mil/>`_
-with support from open-source contributors. The tool is hosted on GitHub at
-`https://github.com/Defense-Cyber-Crime-Center/sqlite-dissect <https://github.com/Defense-Cyber-Crime-Center/sqlite-dissect>`_.
+with support from open-source contributors. The tool is hosted on `GitHub <https://github.com/Defense-Cyber-Crime-Center/sqlite-dissect>`_.
+
+All released versions of the tool can be downloaded from the `GitHub releases page <https://github.com/Defense-Cyber-Crime-Center/sqlite-dissect/releases>`_.
+
 
 .. toctree::
    :maxdepth: 2
