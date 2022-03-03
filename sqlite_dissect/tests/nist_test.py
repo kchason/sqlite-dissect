@@ -1,13 +1,13 @@
 import sqlite3
 import nist_assertions
 from hashlib import md5
-from main import main, parse_args
+from main import main
 import io
 import sys
 import os
 import pytest
 from sqlite_dissect.constants import FILE_TYPE
-from sqlite_dissect.tests.utilities import db_file
+from sqlite_dissect.utilities import DotDict
 
 
 def get_md5_hash(filepath):
@@ -30,7 +30,12 @@ def test_header_reporting(db_file):
 
     parser_output = io.BytesIO()
     sys.stdout = parser_output
-    main(parse_args([db_filepath, '--header']))
+
+    test_args = {
+        'header': True
+    }
+    test_args = DotDict(test_args)
+    main(test_args, db_filepath)
 
     reported_page_size = None
     reported_journal_mode_read = None
@@ -78,7 +83,7 @@ def test_schema_reporting(db_file):
 
     parser_output = io.BytesIO()
     sys.stdout = parser_output
-    main(parse_args([db_filepath]))
+    main(DotDict(), db_filepath)
 
     reported_tables = []
     reported_columns = {}
@@ -144,7 +149,12 @@ def test_row_recovery(db_file):
 
     parser_output = io.BytesIO()
     sys.stdout = parser_output
-    main(parse_args([db_filepath, '-c']))
+
+    test_args = {
+        'carve': True
+    }
+    test_args = DotDict(test_args)
+    main(test_args, db_filepath)
 
     current_table = None
     log_lines = ''
@@ -180,10 +190,13 @@ def test_metadata_reporting(db_file):
 
     parser_output = io.BytesIO()
     sys.stdout = parser_output
-    main(parse_args([db_filepath, '-c']))
+    test_args = {
+        'carve': True
+    }
+    test_args = DotDict(test_args)
+    main(test_args, db_filepath)
 
     current_table = None
-    log_lines = ''
     for line in parser_output.getvalue().splitlines():
         if "Master schema entry: " in line and "row type: table" in line:
             current_table = line[line.find("Master schema entry: "):line.find("row type: ")].split(': ')[1].strip()
@@ -195,11 +208,6 @@ def test_metadata_reporting(db_file):
 
         elif line == '-' * 15:
             current_table = None
-
-    # Logging for debugging purposes:
-    # with open(os.path.join(os.path.split(__file__)[0], 'log_files', db_file[0].name + '.log'), 'w') as log_file:
-    #     log_file.write("Recovered table rows:\n")
-    #     log_file.write(log_lines)
 
     hash_after_parsing = get_md5_hash(db_filepath)
 
