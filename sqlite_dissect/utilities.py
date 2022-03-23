@@ -272,8 +272,7 @@ def is_sqlite_file(path: str) -> bool:
         with open(path, "rb") as sqlite:
             header = sqlite.read(SQLITE_DATABASE_HEADER_LENGTH)
             header_magic = header[0:16]
-            magic = MAGIC_HEADER_STRING.decode(MAGIC_HEADER_STRING_ENCODING)
-            return header_magic == magic
+            return header_magic == MAGIC_HEADER_STRING
     except IOError as e:
         logging.error("Invalid SQLite file found: {}".format(e))
 

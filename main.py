@@ -1,6 +1,5 @@
 import uuid
 import warnings
-from argparse import ArgumentParser
 from logging import CRITICAL
 from logging import DEBUG
 from logging import ERROR
@@ -9,7 +8,7 @@ from logging import WARNING
 from logging import basicConfig
 from logging import getLogger
 from os import path
-from os.path import basename
+from os.path import basename, abspath
 from os.path import join
 from os.path import exists
 from os.path import getsize
@@ -17,7 +16,6 @@ from os.path import normpath
 from os.path import sep
 from time import time
 from warnings import warn
-from _version import __version__
 from sqlite_dissect.carving.rollback_journal_carver import RollBackJournalCarver
 from sqlite_dissect.carving.signature import Signature
 from sqlite_dissect.constants import BASE_VERSION_NUMBER
@@ -43,7 +41,6 @@ from sqlite_dissect.utilities import get_sqlite_files, create_directory, parse_a
 from sqlite_dissect.version_history import VersionHistory
 from sqlite_dissect.version_history import VersionHistoryParser
 from datetime import datetime
-import sys
 
 """
 
@@ -160,8 +157,8 @@ def main(arguments, sqlite_file_path, export_sub_paths=False):
         f"Determined export type to be {export_types} with file prefix: {file_prefix} and output directory: {output_directory}")
 
     # Obtain the SQLite file
-    if not exists(arguments.sqlite_file):
-        raise SqliteError(f"Unable to find SQLite file: {args.sqlite_file}.")
+    if not exists(sqlite_file_path):
+        raise SqliteError(f"Unable to find SQLite file: {sqlite_file_path}.")
 
     """
     
@@ -232,7 +229,7 @@ def main(arguments, sqlite_file_path, export_sub_paths=False):
             raise SqliteError(f"Found a zero length SQLite file with a wal file: {arguments.wal}.  Unable to parse.")
 
         elif zero_length_wal_file:
-            print(f"File: {arguments.sqlite_file} with wal file: {wal_file_name} has no content.  Nothing to parse.")
+            print(f"File: {sqlite_file_path} with wal file: {wal_file_name} has no content.  Nothing to parse.")
             exit(0)
 
         elif rollback_journal_file_name and not zero_length_rollback_journal_file:
@@ -250,7 +247,7 @@ def main(arguments, sqlite_file_path, export_sub_paths=False):
 
         elif zero_length_rollback_journal_file:
             print(
-                f"File: {arguments.sqlite_file} with rollback journal file: {rollback_journal_file_name} has no content. "
+                f"File: {sqlite_file_path} with rollback journal file: {rollback_journal_file_name} has no content. "
                 f"Nothing to parse.")
             exit(0)
 
@@ -279,7 +276,7 @@ def main(arguments, sqlite_file_path, export_sub_paths=False):
             f"Only one journal file should exist. Unable to parse.")
 
     # Print a message parsing is starting and log the start time for reporting at the end on amount of time to run
-    print(f"\nParsing: {arguments.sqlite_file}...")
+    print(f"\nParsing: {sqlite_file_path}...")
     start_time = time()
 
     # Create the database and wal/rollback journal file (if existent)
@@ -438,7 +435,7 @@ def main(arguments, sqlite_file_path, export_sub_paths=False):
         case.register_options(arguments)
 
         # Add the SQLite/DB file to the CASE output
-        source_guids = [case.add_observable_file(normpath(arguments.sqlite_file), 'sqlite-file')]
+        source_guids = [case.add_observable_file(normpath(sqlite_file_path), 'sqlite-file')]
 
         # Add the WAL and journal files to the output if they exist
         if wal_file_name:
@@ -778,7 +775,7 @@ if __name__ == "__main__":
     # Determine if a directory has been passed instead of a file, in which case, find all
     args = parse_args()
     if args.sqlite_path is not None:
-        sqlite_files = get_sqlite_files(args.sqlite_path)
+        sqlite_files = get_sqlite_files(abspath(args.sqlite_path))
         # Ensure there is at least one SQLite file
         if len(sqlite_files) > 0:
             for sqlite_file in sqlite_files:
