@@ -4,6 +4,7 @@ from os.path import abspath, join, dirname, realpath
 
 from main import main
 from sqlite_dissect.utilities import DotDict
+from os.path import abspath, join, realpath, dirname
 
 
 class TestCASEExport(unittest.TestCase):
@@ -30,7 +31,7 @@ class TestCASEExport(unittest.TestCase):
         args = DotDict(args)
 
         # Call the main argument
-        main(args)
+        main(args, input_path)
 
         # Ensure the case.json file exists
         self.assertTrue(os.path.exists(case_path))

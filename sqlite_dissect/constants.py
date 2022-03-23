@@ -87,6 +87,8 @@ MAXIMUM_PAGE_SIZE_LIMIT = 32768
 MAXIMUM_PAGE_SIZE = 65536
 ROLLBACK_JOURNALING_MODE = 1
 WAL_JOURNALING_MODE = 2
+HUMAN_READABLE_JOURNALING_MODES = {ROLLBACK_JOURNALING_MODE: "JOURNAL",
+                                   WAL_JOURNALING_MODE: "WAL"}
 MAXIMUM_EMBEDDED_PAYLOAD_FRACTION = 64
 MINIMUM_EMBEDDED_PAYLOAD_FRACTION = 32
 LEAF_PAYLOAD_FRACTION = 32
@@ -97,6 +99,9 @@ UTF_16BE_DATABASE_TEXT_ENCODING = 3
 DATABASE_TEXT_ENCODINGS = [UTF_8_DATABASE_TEXT_ENCODING,
                            UTF_16LE_DATABASE_TEXT_ENCODING,
                            UTF_16BE_DATABASE_TEXT_ENCODING]
+HUMAN_READABLE_DATABASE_TEXT_ENCODINGS = {UTF_8_DATABASE_TEXT_ENCODING: "UTF-8",
+                                          UTF_16BE_DATABASE_TEXT_ENCODING: "UTF-16be",
+                                          UTF_16LE_DATABASE_TEXT_ENCODING: "UTF-16le"}
 RESERVED_FOR_EXPANSION_REGEX = "^0{40}$"
 
 FREELIST_NEXT_TRUNK_PAGE_LENGTH = 4
@@ -267,7 +272,11 @@ The types of output that are supported by this package.
 EXPORT_TYPES = Enum(["TEXT", "CSV", "SQLITE", "XLSX", "CASE"])
 
 """
+Defines the list of common SQLite3 file extensions for initial identification of files to dissect for the bulk processing.
+"""
+SQLITE_FILE_EXTENSIONS = [".db", ".db3", ".sqlite", ".sqlite3"]
 
+"""
 Below we instantiate and compile a regular expression to check xml illegal characters:
 ILLEGAL_XML_CHARACTER_PATTERN.
 

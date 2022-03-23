@@ -1,4 +1,4 @@
-import os.path
+import uuid
 import warnings
 from argparse import ArgumentParser
 from logging import CRITICAL
@@ -10,6 +10,7 @@ from logging import basicConfig
 from logging import getLogger
 from os import path
 from os.path import basename
+from os.path import join
 from os.path import exists
 from os.path import getsize
 from os.path import normpath
@@ -38,9 +39,11 @@ from sqlite_dissect.file.schema.master import OrdinaryTableRow
 from sqlite_dissect.file.wal.wal import WriteAheadLog
 from sqlite_dissect.output import stringify_master_schema_version
 from sqlite_dissect.output import stringify_master_schema_versions
+from sqlite_dissect.utilities import get_sqlite_files, create_directory, parse_args
 from sqlite_dissect.version_history import VersionHistory
 from sqlite_dissect.version_history import VersionHistoryParser
 from datetime import datetime
+import sys
 
 """
 
@@ -51,13 +54,19 @@ This script will act as the command line script to run this library as a stand-a
 """
 
 
-def main(args):
+def main(arguments, sqlite_file_path, export_sub_paths=False):
+    """
+    The primary entrypoint for the SQLite Dissect carving utility.
+
+    :param arguments: the object of key => value arguments that have been provided as the runtime configuration in which
+        the SQLite Dissect tool should run.
+    """
     # Handle the logging and warning settings
-    if not args.log_level:
+    if not arguments.log_level:
         raise SqliteError("Error in setting up logging: no log level determined.")
 
     # Get the logging level
-    logging_level_arg = args.log_level
+    logging_level_arg = arguments.log_level
     logging_level = logging_level_arg
     if logging_level_arg != "off":
         if logging_level_arg == "critical":
@@ -76,16 +85,17 @@ def main(args):
         # Setup logging
         logging_format = '%(levelname)s %(asctime)s [%(pathname)s] %(funcName)s at line %(lineno)d: %(message)s'
         logging_data_format = '%d %b %Y %H:%M:%S'
-        basicConfig(level=logging_level, format=logging_format, datefmt=logging_data_format, filename=args.log_file)
+        basicConfig(level=logging_level, format=logging_format, datefmt=logging_data_format,
+                    filename=arguments.log_file)
 
     logger = getLogger(LOGGER_NAME)
     logger.debug("Setup logging using the log level: {}.".format(logging_level))
-    logger.info("Using options: {}".format(args))
+    logger.info("Using options: {}".format(arguments))
 
     case = CaseExporter(logger)
     case.start_datetime = datetime.now()
 
-    if args.warnings:
+    if arguments.warnings:
 
         # Turn warnings on if it was specified
         warnings.filterwarnings("always")
@@ -98,52 +108,60 @@ def main(args):
         warnings.filterwarnings("ignore")
 
     # Execute argument checks (inclusive)
-    if args.carve_freelists and not args.carve:
+    if arguments.carve_freelists and not arguments.carve:
         raise SqliteError("Freelist carving cannot be enabled (--carve-freelists) without enabling "
                           "general carving (--carve).")
     # If there is an export format specified that is not "text", then an output directory is required. It is assumed
     # that if there is more than one output format specified then at least one of them is not "text". If there is only
     # one, then it's checked against the "text" format
-    if (len(args.export) > 1 or (len(args.export) == 1 and args.export[0].upper() != EXPORT_TYPES.TEXT)) \
-            and not args.directory:
+    if (len(arguments.export) > 1 or (len(arguments.export) == 1 and arguments.export[0].upper() != EXPORT_TYPES.TEXT)) \
+            and not arguments.directory:
         raise SqliteError("The directory needs to be specified (--directory) if an export type other than text "
                           "is specified (--export).")
-    if args.file_prefix and not args.directory:
+    if arguments.file_prefix and not arguments.directory:
         raise SqliteError("The directory needs to be specified (--directory) if a file prefix is "
                           "specified (--file-prefix).")
 
     # Setup the export type
     export_types = [EXPORT_TYPES.TEXT]
-    if args.export and len(export_types) > 0:
-        export_types = map(str.upper, args.export)
+    if arguments.export and len(export_types) > 0:
+        export_types = map(str.upper, arguments.export)
 
     # Setup the strict format checking
     strict_format_checking = True
-    if args.disable_strict_format_checking:
+    if arguments.disable_strict_format_checking:
         strict_format_checking = False
 
     # Setup the file prefix which taken from the base version name unless the file_prefix argument is set
-    file_prefix = basename(normpath(args.sqlite_file))
-    if args.file_prefix:
-        file_prefix = args.file_prefix
+    file_prefix = basename(normpath(sqlite_file_path))
+    if arguments.file_prefix:
+        file_prefix = arguments.file_prefix
 
     if not file_prefix:
         # The file prefix is taken from the base version name if not specified
-        file_prefix = basename(normpath(args.sqlite_file))
+        file_prefix = basename(normpath(sqlite_file_path))
 
     # Setup the directory if specified
     output_directory = None
-    if args.directory:
-        if not exists(args.directory):
-            raise SqliteError("Unable to find output directory: {}.".format(args.directory))
-        output_directory = args.directory
+    if arguments.directory:
+        if not exists(arguments.directory):
+            raise SqliteError("Unable to find output directory: {}.".format(arguments.directory))
+        output_directory = arguments.directory
+        # Determine if there are sub-paths being configured for exports
+        if export_sub_paths:
+            # Generate unique subpath and create the directory
+            subpath = file_prefix.replace(".", "-") + "-" + str(uuid.uuid4().hex)
+            if create_directory(join(output_directory, subpath)):
+                output_directory = join(output_directory, subpath)
+            else:
+                raise IOError("Unable to create the new sub-directory: {}", join(output_directory, subpath))
 
     logger.debug("Determined export type to be {} with file prefix: {} and output directory: {}"
                  .format(', '.join(export_types), file_prefix, output_directory))
 
     # Obtain the SQLite file
-    if not exists(args.sqlite_file):
-        raise SqliteError("Unable to find SQLite file: {}.".format(args.sqlite_file))
+    if not exists(sqlite_file_path):
+        raise SqliteError("Unable to find SQLite file: {}.".format(sqlite_file_path))
 
     """
     
@@ -159,33 +177,33 @@ def main(args):
 
     # See if the SQLite file is zero-length
     zero_length_sqlite_file = False
-    if getsize(args.sqlite_file) == 0:
+    if getsize(sqlite_file_path) == 0:
         zero_length_sqlite_file = True
 
     # Obtain the wal or rollback_journal file if found (or if specified)
     wal_file_name = None
     rollback_journal_file_name = None
-    if not args.no_journal:
-        if args.wal:
-            if not exists(args.wal):
-                raise SqliteError("Unable to find wal file: {}.".format(args.wal))
-            wal_file_name = args.wal
-        elif args.rollback_journal:
-            if not exists(args.rollback_journal):
-                raise SqliteError("Unable to find rollback journal file: {}.".format(args.rollback_journal))
-            rollback_journal_file_name = args.rollback_journal
+    if not arguments.no_journal:
+        if arguments.wal:
+            if not exists(arguments.wal):
+                raise SqliteError("Unable to find wal file: {}.".format(arguments.wal))
+            wal_file_name = arguments.wal
+        elif arguments.rollback_journal:
+            if not exists(arguments.rollback_journal):
+                raise SqliteError("Unable to find rollback journal file: {}.".format(arguments.rollback_journal))
+            rollback_journal_file_name = arguments.rollback_journal
         else:
-            if exists(args.sqlite_file + WAL_FILE_POSTFIX):
-                wal_file_name = args.sqlite_file + WAL_FILE_POSTFIX
-            if exists(args.sqlite_file + ROLLBACK_JOURNAL_POSTFIX):
-                rollback_journal_file_name = args.sqlite_file + ROLLBACK_JOURNAL_POSTFIX
+            if exists(sqlite_file_path + WAL_FILE_POSTFIX):
+                wal_file_name = sqlite_file_path + WAL_FILE_POSTFIX
+            if exists(sqlite_file_path + ROLLBACK_JOURNAL_POSTFIX):
+                rollback_journal_file_name = sqlite_file_path + ROLLBACK_JOURNAL_POSTFIX
 
     # Exempted tables are only supported currently for rollback journal files
     rollback_journal_exempted_tables = []
-    if args.exempted_tables:
+    if arguments.exempted_tables:
         if not rollback_journal_file_name:
             raise SqliteError("Exempted tables are only supported for use with rollback journal parsing.")
-        rollback_journal_exempted_tables = args.exempted_tables.split(",")
+        rollback_journal_exempted_tables = arguments.exempted_tables.split(",")
 
     # See if the wal file is zero-length
     zero_length_wal_file = False
@@ -211,11 +229,12 @@ def main(args):
     
             """
 
-            raise SqliteError("Found a zero length SQLite file with a wal file: {}.  Unable to parse.".format(args.wal))
+            raise SqliteError(
+                "Found a zero length SQLite file with a wal file: {}.  Unable to parse.".format(arguments.wal))
 
         elif zero_length_wal_file:
             print("File: {} with wal file: {} has no content.  Nothing to parse."
-                  .format(args.sqlite_file, wal_file_name))
+                  .format(sqlite_file_path, wal_file_name))
             exit(0)
 
         elif rollback_journal_file_name and not zero_length_rollback_journal_file:
@@ -228,15 +247,15 @@ def main(args):
             """
 
             raise SqliteError("Found a zero length SQLite file with a rollback journal file: {}.  Unable to parse."
-                              .format(args.rollback_journal))
+                              .format(arguments.rollback_journal))
 
         elif zero_length_rollback_journal_file:
             print("File: {} with rollback journal file: {} has no content.  Nothing to parse."
-                  .format(args.sqlite_file, rollback_journal_file_name))
+                  .format(sqlite_file_path, rollback_journal_file_name))
             exit(0)
 
         else:
-            print("File: {} has no content. Nothing to parse.".format(args.sqlite_file))
+            print("File: {} has no content. Nothing to parse.".format(sqlite_file_path))
             exit(0)
 
     # Make sure that both of the journal files are not found
@@ -256,14 +275,14 @@ def main(args):
         """
 
         raise SqliteError("Found both a rollback journal: {} and wal file: {}.  Only one journal file should exist.  "
-                          "Unable to parse.".format(args.rollback_journal, args.wal))
+                          "Unable to parse.".format(arguments.rollback_journal, arguments.wal))
 
     # Print a message parsing is starting and log the start time for reporting at the end on amount of time to run
-    print("\nParsing: {}...".format(args.sqlite_file))
+    print("\nParsing: {}...".format(sqlite_file_path))
     start_time = time()
 
     # Create the database and wal/rollback journal file (if existent)
-    database = Database(args.sqlite_file, strict_format_checking=strict_format_checking)
+    database = Database(sqlite_file_path, strict_format_checking=strict_format_checking)
 
     write_ahead_log = None
     if wal_file_name and not zero_length_wal_file:
@@ -276,24 +295,30 @@ def main(args):
     # Create the version history (this is currently only supported for the WAL)
     version_history = VersionHistory(database, write_ahead_log)
 
+    # Check if the header info was asked for
+    if arguments.header:
+        # Print the header info of the database
+        print("\nDatabase header information:\n{}".format(database.database_header.stringify(padding="\t")))
+        print("Continuing to parse...")
+
     # Check if the master schema was asked for
-    if args.schema:
+    if arguments.schema:
         # print the master schema of the database
         print("\nDatabase Master Schema:\n{}".format(stringify_master_schema_version(database)))
         print("Continuing to parse...")
 
     # Check if the schema history was asked for
-    if args.schema_history:
+    if arguments.schema_history:
         # print the master schema version history
         print("\nVersion History of Master Schemas:\n{}".format(stringify_master_schema_versions(version_history)))
         print("Continuing to parse...")
 
     # Get the signature options
-    print_signatures = args.signatures
+    print_signatures = arguments.signatures
 
     # Get the carving options
-    carve = args.carve
-    carve_freelists = args.carve_freelists
+    carve = arguments.carve
+    carve_freelists = arguments.carve_freelists
 
     # Check to see if carve freelists was set without setting carve
     if not carve and carve_freelists:
@@ -304,8 +329,8 @@ def main(args):
 
     # Specific tables to be carved
     specified_tables_to_carve = []
-    if args.tables:
-        specified_tables_to_carve = args.tables.split(",")
+    if arguments.tables:
+        specified_tables_to_carve = arguments.tables.split(",")
 
     if rollback_journal_exempted_tables and specified_tables_to_carve:
         for table in rollback_journal_exempted_tables:
@@ -406,13 +431,13 @@ def main(args):
         exported = True
 
         # Add the header and get the GUID for the tool for future linking
-        case.generate_header()
+        tool_guid = case.generate_header()
 
         # Add the runtime arguments to the CASE output
-        case.register_options(args)
+        case.register_options(arguments)
 
         # Add the SQLite/DB file to the CASE output
-        source_guids = [case.add_observable_file(normpath(args.sqlite_file), 'sqlite-file')]
+        source_guids = [case.add_observable_file(normpath(arguments.sqlite_file), 'sqlite-file')]
 
         # Add the WAL and journal files to the output if they exist
         if wal_file_name:
@@ -427,10 +452,10 @@ def main(args):
         case.end_datetime = datetime.now()
 
         # Trigger the generation of the investigative action since the start and end time have now been set
-        case.generate_investigation_action(source_guids)
+        case.generate_investigation_action(source_guids, tool_guid)
 
         # Export the output to a JSON file
-        case.export_case_file(path.join(args.directory, 'case.json'))
+        case.export_case_file(path.join(arguments.directory, 'case.json'))
 
     # The export type was not found (this should not occur due to the checking of argparse)
     if not exported:
@@ -516,8 +541,8 @@ def print_text(output_directory, file_prefix, carve, carve_freelists, specified_
                         commit_text_exporter.write_commit(commit)
 
         # Append the output file to the exported file list
-        logger.debug('Adding exported file to export_paths {}'.format(os.path.join(output_directory, text_file_name)))
-        export_paths.append(os.path.join(output_directory, text_file_name))
+        logger.debug('Adding exported file to export_paths {}'.format(join(output_directory, text_file_name)))
+        export_paths.append(join(output_directory, text_file_name))
 
     else:
 
@@ -555,6 +580,8 @@ def print_text(output_directory, file_prefix, carve, carve_freelists, specified_
 
                 for commit in version_history_parser:
                     CommitConsoleExporter.write_commit(commit)
+
+            print('-' * 15)
 
     return export_paths
 
@@ -639,7 +666,7 @@ def print_sqlite(output_directory, file_prefix, carve, carve_freelists,
                 for commit in version_history_parser:
                     commit_sqlite_exporter.write_commit(master_schema_entry, commit)
 
-    return os.path.join(output_directory, sqlite_file_name)
+    return join(output_directory, sqlite_file_name)
 
 
 def print_xlsx(output_directory, file_prefix, carve, carve_freelists, specified_tables_to_carve,
@@ -682,7 +709,7 @@ def print_xlsx(output_directory, file_prefix, carve, carve_freelists, specified_
                 for commit in version_history_parser:
                     commit_xlsx_exporter.write_commit(master_schema_entry, commit)
 
-    return os.path.join(output_directory, xlsx_file_name)
+    return join(output_directory, xlsx_file_name)
 
 
 def carve_rollback_journal(output_directory, rollback_journal_file, rollback_journal_file_name,
@@ -693,9 +720,9 @@ def carve_rollback_journal(output_directory, rollback_journal_file, rollback_jou
     Carve the Rollback Journal file (Under Development)
 
     Note: Since there is no normal parsing of the rollback journal file implemented yet, this is only done when
-          carving is specified.  Also, since we are blindly carving each page in the rollback journal currently,
-          we are not checking for pointer map pages, freelist pages, and so on.  Therefore, we do not care about the
-          carve_freelist_pages option here.  The rollback journal file is being carved as it were all unallocated space.
+    carving is specified.  Also, since we are blindly carving each page in the rollback journal currently,
+    we are not checking for pointer map pages, freelist pages, and so on.  Therefore, we do not care about the
+    carve_freelist_pages option here.  The rollback journal file is being carved as it were all unallocated space.
 
     """
 
@@ -717,28 +744,20 @@ def carve_rollback_journal(output_directory, rollback_journal_file, rollback_jou
 
         """
 
-        Only account for OrdinaryTableRow objects (not VirtualTableRow objects) that are not "without rowid" tables.
-        All signatures generated will not be outside this criteria either.
+        Only account for OrdinaryTableRow objects (not VirtualTableRow objects) that are not "without rowid" tables or
+        internal schema objects. All signatures generated will not be outside this criteria either.
 
         """
 
-        if isinstance(master_schema_entry, OrdinaryTableRow) and not master_schema_entry.without_row_id:
+        if isinstance(master_schema_entry, OrdinaryTableRow) and not master_schema_entry.without_row_id \
+                and not master_schema_entry.internal_schema_object:
 
             signature = None
             if signatures and master_schema_entry.name in signatures:
                 signature = signatures[master_schema_entry.name]
 
             # Make sure we found the error but don't error out if we don't.  Alert the user.
-            if not signature and master_schema_entry.row_type is MASTER_SCHEMA_ROW_TYPE.TABLE \
-                    and not master_schema_entry.without_row_id \
-                    and not master_schema_entry.internal_schema_object:
-                print("Unable to find signature for: {}.  This table will not be carved from the rollback journal."
-                      .format(master_schema_entry.name))
-                logger.error("Unable to find signature for: {}.  This table will not be carved from the "
-                             "rollback journal.".format(master_schema_entry.name))
-
-            else:
-
+            if signature:
                 # Carve the rollback journal with the signature
                 carved_commits = RollBackJournalCarver.carve(rollback_journal_file,
                                                              version_history.versions[BASE_VERSION_NUMBER],
@@ -747,85 +766,24 @@ def carve_rollback_journal(output_directory, rollback_journal_file, rollback_jou
                 for commit in carved_commits:
                     commit_csv_exporter.write_commit(master_schema_entry, commit)
 
+            else:
+                print("Unable to find signature for: {}.  This table will not be carved from the rollback journal."
+                      .format(master_schema_entry.name))
+                logger.error("Unable to find signature for: {}.  This table will not be carved from the "
+                             "rollback journal.".format(master_schema_entry.name))
+
 
 if __name__ == "__main__":
-    description = "SQLite Dissect is a SQLite parser with recovery abilities over SQLite databases " \
-                  "and their accompanying journal files. If no options are set other than the file " \
-                  "name, the default behaviour will be to check for any journal files and print to " \
-                  "the console the output of the SQLite files.  The directory of the SQLite file " \
-                  "specified will be searched through to find the associated journal files.  If " \
-                  "they are not in the same directory as the specified file, they will not be found " \
-                  "and their location will need to be specified in the command.  SQLite carving " \
-                  "will not be done by default.  Please see the options below to enable carving."
-
-    parser = ArgumentParser(description=description)
-
-    parser.add_argument("sqlite_file", metavar="SQLITE_FILE", help="The SQLite database file")
-
-    parser.add_argument("-v", "--version", action="version", version="version {version}".format(version=__version__),
-                        help="display the version of SQLite Dissect")
-    parser.add_argument("-d", "--directory", metavar="OUTPUT_DIRECTORY", help="directory to write output to "
-                                                                              "(must be specified for outputs other "
-                                                                              "than console text)")
-    parser.add_argument("-p", "--file-prefix", default="", metavar="FILE_PREFIX",
-                        help="the file prefix to use on output files, default is the name of the SQLite "
-                             "file (the directory for output must be specified)")
-    parser.add_argument("-e", "--export",
-                        nargs="*",
-                        choices=["text", "csv", "sqlite", "xlsx", "case"],
-                        default="text",
-                        metavar="EXPORT_TYPE",
-                        help="the format to export to {text, csv, sqlite, xlsx, case} (text written to console if -d "
-                             "is not specified)")
-
-    journal_group = parser.add_mutually_exclusive_group()
-    journal_group.add_argument("-n", "--no-journal", action="store_true", default=False,
-                               help="turn off automatic detection of journal files")
-    journal_group.add_argument("-w", "--wal",
-                               help="the wal file to use instead of searching the SQLite file directory by default")
-    journal_group.add_argument("-j", "--rollback-journal",
-                               help="the rollback journal file to use in carving instead of searching the SQLite file "
-                                    "directory by default (under development, currently only outputs to csv, output "
-                                    "directory needs to be specified)")
-
-    parser.add_argument("-r", "--exempted-tables", metavar="EXEMPTED_TABLES",
-                        help="comma-delimited string of tables [table1,table2,table3] to exempt (only implemented "
-                             "and allowed for rollback journal parsing currently) ex.) table1,table2,table3")
-
-    parser.add_argument("-s", "--schema", action="store_true",
-                        help="output the schema to console, the initial schema found in the main database file")
-    parser.add_argument("-t", "--schema-history", action="store_true",
-                        help="output the schema history to console, prints the --schema information and "
-                             "write-head log changes")
-
-    parser.add_argument("-g", "--signatures", action="store_true",
-                        help="output the signatures generated to console")
-
-    parser.add_argument("-c", "--carve", action="store_true", default=False,
-                        help="carves and recovers table data")
-    parser.add_argument("-f", "--carve-freelists", action="store_true", default=False,
-                        help="carves freelist pages (carving must be enabled, under development)")
-
-    parser.add_argument("-b", "--tables", metavar="TABLES",
-                        help="specified comma-delimited string of tables [table1,table2,table3] to carve "
-                             "ex.) table1,table2,table3")
-
-    parser.add_argument("-k", "--disable-strict-format-checking", action="store_true", default=False,
-                        help="disable strict format checks for SQLite databases "
-                             "(this may result in improperly parsed SQLite files)")
-
-    logging_group = parser.add_mutually_exclusive_group()
-    logging_group.add_argument("-l", "--log-level", default="off",
-                               choices=["critical", "error", "warning", "info", "debug", "off"],
-                               metavar="LOG_LEVEL",
-                               help="level to log messages at {critical, error, warning, info, debug, off}")
-    parser.add_argument("-i", "--log-file", default=None, metavar="LOG_FILE",
-                        help="log file to write too, default is to "
-                             "write to console, ignored if log "
-                             "level set to off (appends if file "
-                             "already exists)")
-
-    parser.add_argument("--warnings", action="store_true", default=False, help="enable runtime warnings")
-
-    # Call the main function
-    main(parser.parse_args())
+    # Determine if a directory has been passed instead of a file, in which case, find all
+    args = parse_args()
+    if args.sqlite_path is not None:
+        sqlite_files = get_sqlite_files(args.sqlite_path)
+        # Ensure there is at least one SQLite file
+        if len(sqlite_files) > 0:
+            for sqlite_file in sqlite_files:
+                # Call the main function
+                main(args, sqlite_file, len(sqlite_files) > 1)
+        else:
+            raise SqliteError("No valid SQLite files were found in the provided path")
+    else:
+        raise SqliteError("No SQLite file or directory was passed")

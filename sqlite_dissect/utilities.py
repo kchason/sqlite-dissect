@@ -1,5 +1,5 @@
 import logging
-from os import walk
+from os import walk, makedirs, path
 from os.path import exists, isdir, join
 
 from binascii import hexlify
@@ -8,16 +8,17 @@ from logging import getLogger
 from re import compile
 from struct import pack
 from struct import unpack
-from sqlite_dissect.constants import ALL_ZEROS_REGEX, SQLITE_DATABASE_HEADER_LENGTH, MAGIC_HEADER_STRING, \
+from sqlite_dissect.constants import ALL_ZEROS_REGEX, MAGIC_HEADER_STRING, SQLITE_DATABASE_HEADER_LENGTH, \
     MAGIC_HEADER_STRING_ENCODING
 from sqlite_dissect.constants import LOGGER_NAME
 from sqlite_dissect.constants import OVERFLOW_HEADER_LENGTH
 from sqlite_dissect.constants import BLOB_SIGNATURE_IDENTIFIER
 from sqlite_dissect.constants import TEXT_SIGNATURE_IDENTIFIER
 from sqlite_dissect.exception import InvalidVarIntError
+from _version import __version__
+from argparse import ArgumentParser
 
 """
-
 utilities.py
 
 This script holds general utility functions for reference by the sqlite carving library.
@@ -34,6 +35,10 @@ get_md5_hash(string)
 get_record_content(serial_type, record_body, offset=0)
 get_serial_type_signature(serial_type)
 has_content(byte_array)
+is_sqlite_file(path)
+get_sqlite_files(path)
+create_directory(dir_path)
+hash_file(file_path, hash_algo=hashlib.sha256())
 
 """
 
@@ -207,7 +212,7 @@ def get_record_content(serial_type, record_body, offset=0):
 
     # These values are not used/reserved and should not be found in sqlite files
     elif serial_type == 10 or serial_type == 11:
-        raise Exception()
+        raise ValueError("The serial type {} is not expected in SQLite files".format(serial_type))
 
     # A BLOB that is (N-12)/2 bytes in length
     elif serial_type >= 12 and serial_type % 2 == 0:
@@ -248,6 +253,7 @@ def is_sqlite_file(path):
     """
     Determines if the specified file contains the magic bytes to indicate it is a SQLite file. This is not meant to be a
     full validation of the file format, and that is asserted within the class at file/database/header.py.
+
     :param path: the string path to the file to be validated.
     :raises:
         IOError when the provided path does not exist in the filesystem.
@@ -300,3 +306,124 @@ def get_sqlite_files(path):
         raise IOError("The specified path cannot be found: {}".format(path))
 
     return sqlite_files
+
+
+def create_directory(dir_path):
+    """
+    Creates a directory if it doesn't already exist.
+    :param dir_path: The path of the directory to create
+    :return: bool whether the directory was created correctly or if it already exists
+    """
+    if not exists(dir_path):
+        try:
+            makedirs(dir_path)
+        except (OSError, IOError) as e:
+            logging.error("Unable to create directory {} with error: {}".format(dir_path, e))
+            return False
+
+    # Ensure the directory was actually created, and it is actually a directory
+    return exists(dir_path) and isdir(dir_path)
+
+
+def hash_file(file_path, hash_algo=hashlib.sha256()):
+    """
+    Generates a hash of a file by chunking it and utilizing the Python hashlib library.
+    """
+    # Ensure the file path exists
+    if not path.exists(file_path):
+        raise IOError("The file path {} is not valid, the file does not exist".format(file_path))
+
+    with open(file_path, 'rb') as f:
+        while True:
+            # Reading is buffered, so we can read smaller chunks.
+            chunk = f.read(hash_algo.block_size)
+            if not chunk:
+                break
+            hash_algo.update(chunk)
+    return hash_algo.hexdigest()
+
+
+# Uses ArgumentParser from argparse to evaluate user arguments.
+def parse_args(args=None):
+    description = "SQLite Dissect is a SQLite parser with recovery abilities over SQLite databases " \
+                  "and their accompanying journal files. If no options are set other than the file " \
+                  "name, the default behaviour will be to check for any journal files and print to " \
+                  "the console the output of the SQLite files.  The directory of the SQLite file " \
+                  "specified will be searched through to find the associated journal files.  If " \
+                  "they are not in the same directory as the specified file, they will not be found " \
+                  "and their location will need to be specified in the command.  SQLite carving " \
+                  "will not be done by default.  Please see the options below to enable carving."
+
+    parser = ArgumentParser(description=description)
+
+    parser.add_argument("sqlite_path", metavar="SQLITE_PATH", help="The path to the SQLite database file or directory "
+                                                                   "containing multiple files")
+
+    parser.add_argument("-v", "--version", action="version", version="version {version}".format(version=__version__),
+                        help="display the version of SQLite Dissect")
+    parser.add_argument("-d", "--directory", metavar="OUTPUT_DIRECTORY", help="directory to write output to "
+                                                                              "(must be specified for outputs other "
+                                                                              "than console text)")
+    parser.add_argument("-p", "--file-prefix", default="", metavar="FILE_PREFIX",
+                        help="the file prefix to use on output files, default is the name of the SQLite "
+                             "file (the directory for output must be specified)")
+    parser.add_argument("-e", "--export",
+                        nargs="*",
+                        choices=["text", "csv", "sqlite", "xlsx", "case"],
+                        default=["text"],
+                        metavar="EXPORT_TYPE",
+                        help="the format to export to {text, csv, sqlite, xlsx, case} (text written to console if -d "
+                             "is not specified)")
+
+    journal_group = parser.add_mutually_exclusive_group()
+    journal_group.add_argument("-n", "--no-journal", action="store_true", default=False,
+                               help="turn off automatic detection of journal files")
+    journal_group.add_argument("-w", "--wal",
+                               help="the wal file to use instead of searching the SQLite file directory by default")
+    journal_group.add_argument("-j", "--rollback-journal",
+                               help="the rollback journal file to use in carving instead of searching the SQLite file "
+                                    "directory by default (under development, currently only outputs to csv, output "
+                                    "directory needs to be specified)")
+
+    parser.add_argument("-r", "--exempted-tables", metavar="EXEMPTED_TABLES",
+                        help="comma-delimited string of tables [table1,table2,table3] to exempt (only implemented "
+                             "and allowed for rollback journal parsing currently) ex.) table1,table2,table3")
+
+    parser.add_argument("-s", "--schema", action="store_true",
+                        help="output the schema to console, the initial schema found in the main database file")
+    parser.add_argument("-t", "--schema-history", action="store_true",
+                        help="output the schema history to console, prints the --schema information and "
+                             "write-head log changes")
+
+    parser.add_argument("-g", "--signatures", action="store_true",
+                        help="output the signatures generated to console")
+
+    parser.add_argument("-c", "--carve", action="store_true", default=False,
+                        help="carves and recovers table data")
+    parser.add_argument("-f", "--carve-freelists", action="store_true", default=False,
+                        help="carves freelist pages (carving must be enabled, under development)")
+
+    parser.add_argument("-b", "--tables", metavar="TABLES",
+                        help="specified comma-delimited string of tables [table1,table2,table3] to carve "
+                             "ex.) table1,table2,table3")
+
+    parser.add_argument("-k", "--disable-strict-format-checking", action="store_true", default=False,
+                        help="disable strict format checks for SQLite databases "
+                             "(this may result in improperly parsed SQLite files)")
+
+    logging_group = parser.add_mutually_exclusive_group()
+    logging_group.add_argument("-l", "--log-level", default="off",
+                               choices=["critical", "error", "warning", "info", "debug", "off"],
+                               metavar="LOG_LEVEL",
+                               help="level to log messages at {critical, error, warning, info, debug, off}")
+    parser.add_argument("-i", "--log-file", default=None, metavar="LOG_FILE",
+                        help="log file to write too, default is to "
+                             "write to console, ignored if log "
+                             "level set to off (appends if file "
+                             "already exists)")
+
+    parser.add_argument("--warnings", action="store_true", default=False, help="enable runtime warnings")
+
+    parser.add_argument("--header", action="store_true", default=False, help="Print header information")
+
+    return parser.parse_args(args)
