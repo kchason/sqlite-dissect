@@ -1,9 +1,9 @@
 import logging
+import hashlib
+
 from os import walk, makedirs, path
 from os.path import exists, isdir, join
-
 from binascii import hexlify
-from hashlib import md5
 from logging import getLogger
 from re import compile
 from struct import pack
@@ -148,7 +148,7 @@ def get_class_instance(class_name):
 
 
 def get_md5_hash(string):
-    md5_hash = md5()
+    md5_hash = hashlib.md5()
     md5_hash.update(string)
     return md5_hash.hexdigest().upper()
 
