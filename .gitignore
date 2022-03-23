@@ -28,6 +28,10 @@
 # PyTest and Coverage
 /case
 /.pytest_cache
-/.coverage
 /htmlcov
 /docs/build
+sqlite_dissect/tests/log_files/
+sqlite_dissect/tests/reports/
+test_files/
+*.coverage
+
