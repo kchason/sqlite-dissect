@@ -108,17 +108,16 @@ def encode_varint(value):
     if value & 0xff000000 << 32:
 
         byte = value & 0xff
-        byte_array.insert(0, pack("B", byte))
+        byte_array.insert(0, byte)
         value >>= 8
 
         for _ in range(8):
-            byte_array.insert(0, pack("B", (value & 0x7f) | 0x80))
+            byte_array.insert(0, ((value & 0x7f) | 0x80))
             value >>= 7
 
     else:
-
         while value:
-            byte_array.insert(0, pack("B", (value & 0x7f) | 0x80))
+            byte_array.insert(0, ((value & 0x7f) | 0x80))
             value >>= 7
 
             if len(byte_array) >= 9:
@@ -128,7 +127,7 @@ def encode_varint(value):
                 getLogger(LOGGER_NAME).error(log_message)
                 raise InvalidVarIntError(log_message)
 
-        byte_array[-1] &= 0x7f
+        byte_array = byte_array[:-1] + pack("B", (byte_array[-1] & 0x7f))
 
     return byte_array
 

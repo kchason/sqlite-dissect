@@ -83,7 +83,7 @@ def test_generate_regex_for_simplified_serial_type():
     # hardcoded values for -2 and -1
     # hex string for 0-9
     # CarvingError for anything else
-    assert generate_regex_for_simplified_serial_type(4) == "\x04"
+    assert generate_regex_for_simplified_serial_type(4) == b"\x04"
 
     with pytest.raises(CarvingError):
         generate_regex_for_simplified_serial_type(-10)

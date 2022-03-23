@@ -1,13 +1,13 @@
 import sqlite3
-import nist_assertions
+import sqlite_dissect.tests.nist_assertions
 from hashlib import md5
 from main import main
 import io
 import sys
-import os
 import pytest
 from sqlite_dissect.constants import FILE_TYPE
-from sqlite_dissect.tests.utilities import db_file, parse_csv
+from sqlite_dissect.tests import nist_assertions
+from sqlite_dissect.tests.utilities import parse_csv
 from sqlite_dissect.utilities import get_sqlite_files, parse_args
 
 
@@ -41,6 +41,7 @@ def test_header_reporting(db_file):
     reported_num_pages = None
     reported_encoding = None
     for line in parser_output.getvalue().splitlines():
+        line = str(line)
         if "FILE FORMAT WRITE VERSION" in line.upper():
             reported_journal_mode_write = line.split(': ')[1].strip()
         elif "FILE FORMAT READ VERSION" in line.upper():
@@ -91,6 +92,7 @@ def test_schema_reporting(db_file):
     current_table = None
     row_count = 0
     for line in parser_output.getvalue().splitlines():
+        line = str(line)
         if "Master schema entry: " in line and "row type: table" in line:
             current_table = line[line.find("Master schema entry: "):line.find("row type: ")].split(': ')[1].strip()
             reported_tables.append(current_table)
@@ -153,8 +155,7 @@ def test_row_recovery(db_file, tmp_path):
 
     parser_output = io.BytesIO()
     sys.stdout = parser_output
-    args = parse_args([db_filepath, '-c',
-    '-e', 'csv', '--directory', str(tmp_path)])
+    args = parse_args([db_filepath, '-c', '-e', 'csv', '--directory', str(tmp_path)])
     sqlite_files = get_sqlite_files(args.sqlite_path)
     main(args, sqlite_files[0], len(sqlite_files) > 1)
 
@@ -185,8 +186,8 @@ def test_metadata_reporting(db_file):
     main(args, sqlite_files[0], len(sqlite_files) > 1)
 
     current_table = None
-    log_lines = ''
     for line in parser_output.getvalue().splitlines():
+        line = str(line)
         if "Master schema entry: " in line and "row type: table" in line:
             current_table = line[line.find("Master schema entry: "):line.find("row type: ")].split(': ')[1].strip()
 
@@ -197,11 +198,6 @@ def test_metadata_reporting(db_file):
 
         elif line == '-' * 15:
             current_table = None
-
-    # Logging for debugging purposes:
-    # with open(os.path.join(os.path.split(__file__)[0], 'log_files', db_file[0].name + '.log'), 'w') as log_file:
-    #     log_file.write("Recovered table rows:\n")
-    #     log_file.write(log_lines)
 
     hash_after_parsing = get_md5_hash(db_filepath)
 
