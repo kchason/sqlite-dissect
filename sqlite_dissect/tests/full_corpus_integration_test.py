@@ -37,7 +37,7 @@ class FullCorpusIntegrationTest(unittest.TestCase):
             output_file = join(self.output_path, basename(sqlite_file) + '.txt')
 
             # Call the main argument
-            main(args)
+            main(args, sqlite_file)
 
             # Ensure the case.json file exists
             self.assertTrue(exists(output_file))
