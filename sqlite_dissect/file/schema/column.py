@@ -558,7 +558,7 @@ class ColumnDefinition(object):
         return False
 
     def __repr__(self):
-        return self.__str__().encode("hex")
+        return self.__str__()
 
     def __str__(self):
         return sub("\t", "", sub("\n", " ", self.stringify()))
@@ -593,7 +593,7 @@ class ColumnConstraint(object):
         self.constraint = constraint
 
     def __repr__(self):
-        return self.__str__().encode("hex")
+        return self.__str__()
 
     def __str__(self):
         return sub("\t", "", sub("\n", " ", self.stringify()))

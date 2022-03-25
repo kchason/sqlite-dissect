@@ -21,7 +21,7 @@ class RollbackJournal(object):
         self.file_handle = FileHandle(FILE_TYPE.ROLLBACK_JOURNAL, file_identifier, file_size=file_size)
 
     def __repr__(self):
-        return self.__str__().encode("hex")
+        return self.__str__()
 
     def __str__(self):
         return sub("\t", "", sub("\n", " ", self.stringify()))

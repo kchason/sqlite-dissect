@@ -290,7 +290,7 @@ class MasterSchema(object):
         self.master_schema_page_numbers = [master_schema_page.number for master_schema_page in self.master_schema_pages]
 
     def __repr__(self):
-        return self.__str__().encode("hex")
+        return self.__str__()
 
     def __str__(self):
         return sub("\t", "", sub("\n", " ", self.stringify()))
@@ -592,7 +592,7 @@ class MasterSchemaRow(object):
         self.md5_hash_identifier = get_md5_hash(master_schema_entry_identifier_string)
 
     def __repr__(self):
-        return self.__str__().encode("hex")
+        return self.__str__()
 
     def __str__(self):
         return sub("\t", "", sub("\n", " ", self.stringify()))

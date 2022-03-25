@@ -26,7 +26,7 @@ class CommitConsoleExporter(object):
     @staticmethod
     def write_header(master_schema_entry, page_type):
         print(f"\nMaster schema entry: {master_schema_entry.name} row type: {master_schema_entry.row_type} on page "
-              f"type: {page_type} with sql: {master_schema_entry.sql}.".encode())
+              f"type: {page_type} with sql: {page_type}.")
 
     @staticmethod
     def write_commit(commit):

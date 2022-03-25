@@ -197,7 +197,7 @@ class VersionHistory(object):
         self.number_of_versions = len(self.versions)
 
     def __repr__(self):
-        return self.__str__().encode("hex")
+        return self.__str__()
 
     def __str__(self):
         return sub("\t", "", sub("\n", " ", self.stringify()))
@@ -397,7 +397,7 @@ class VersionHistoryParser(VersionParser):
             return self
 
         def __repr__(self):
-            return self.__str__().encode("hex")
+            return self.__str__()
 
         def __next__(self):
             return self.next()
@@ -776,7 +776,7 @@ class Commit(object):
         self.carved_cells = {}
 
     def __repr__(self):
-        return self.__str__().encode("hex")
+        return self.__str__()
 
     def __str__(self):
         return sub("\t", "", sub("\n", " ", self.stringify()))

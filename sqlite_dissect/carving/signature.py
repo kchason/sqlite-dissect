@@ -820,7 +820,7 @@ class SchemaColumnSignature(object):
             raise SignatureError(log_message)
 
     def __repr__(self):
-        return self.__str__().encode("hex")
+        return self.__str__()
 
     def __str__(self):
         return sub("\t", "", sub("\n", " ", self.stringify()))
@@ -917,7 +917,7 @@ class TableColumnSignature(object):
             column_signature.number_of_rows = self.count
 
     def __repr__(self):
-        return self.__str__().encode("hex")
+        return self.__str__()
 
     def __str__(self):
         return sub("\t", "", sub("\n", " ", self.stringify()))
@@ -1098,7 +1098,7 @@ class TableRowSignature(object):
                 raise SignatureError(log_message)
 
     def __repr__(self):
-        return self.__str__().encode("hex")
+        return self.__str__()
 
     def __str__(self):
         return sub("\t", "", sub("\n", " ", self.stringify()))
@@ -1311,7 +1311,7 @@ class ColumnSignature(object):
             raise ValueError(log_message)
 
     def __repr__(self):
-        return self.__str__().encode("hex")
+        return self.__str__()
 
     def __str__(self):
         return sub("\t", "", sub("\n", " ", self.stringify()))

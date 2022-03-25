@@ -34,7 +34,7 @@ class TableConstraint(object):
         self.comments = [comment.strip() for comment in comments] if comments else []
 
     def __repr__(self):
-        return self.__str__().encode("hex")
+        return self.__str__()
 
     def __str__(self):
         return sub("\t", "", sub("\n", " ", self.stringify()))

@@ -356,7 +356,7 @@ class BTreePageHeader(object):
         self.md5_hex_digest = get_md5_hash(page[self.offset:self.header_length])
 
     def __repr__(self):
-        return self.__str__().encode("hex")
+        return self.__str__()
 
     def __str__(self):
         return sub("\t", "", sub("\n", " ", self.stringify()))

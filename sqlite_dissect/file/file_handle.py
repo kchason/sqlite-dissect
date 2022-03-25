@@ -179,7 +179,7 @@ class FileHandle(object):
             raise ValueError(log_message)
 
     def __repr__(self):
-        return self.__str__().encode("hex")
+        return self.__str__()
 
     def __str__(self):
         return sub("\t", "", sub("\n", " ", self.stringify()))

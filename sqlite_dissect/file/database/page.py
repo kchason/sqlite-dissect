@@ -112,7 +112,7 @@ class Page(object):
         self.unallocated_space_end_offset = None
 
     def __repr__(self):
-        return self.__str__().encode("hex")
+        return self.__str__()
 
     def __str__(self):
         return sub("\t", "", sub("\n", " ", self.stringify()))
@@ -551,7 +551,7 @@ class PointerMapEntry(object):
         self.md5_hex_digest = md5_hex_digest
 
     def __repr__(self):
-        return self.__str__().encode("hex")
+        return self.__str__()
 
     def __str__(self):
         return sub("\t", "", sub("\n", " ", self.stringify()))
@@ -907,7 +907,7 @@ class BTreeCell(object):
         self.md5_hex_digest = None
 
     def __repr__(self):
-        return self.__str__().encode("hex")
+        return self.__str__()
 
     def __str__(self):
         return sub("\t", "", sub("\n", " ", self.stringify()))

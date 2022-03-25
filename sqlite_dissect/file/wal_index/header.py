@@ -235,7 +235,7 @@ class WriteAheadLogIndexCheckpointInfo(object):
         self.md5_hex_digest = get_md5_hash(wal_index_checkpoint_info_byte_array)
 
     def __repr__(self):
-        return self.__str__().encode("hex")
+        return self.__str__()
 
     def __str__(self):
         return sub("\t", "", sub("\n", " ", self.stringify()))
