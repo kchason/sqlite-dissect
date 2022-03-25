@@ -7,7 +7,7 @@ import sys
 import pytest
 from sqlite_dissect.constants import FILE_TYPE
 from sqlite_dissect.tests import nist_assertions
-from sqlite_dissect.tests.utilities import parse_csv
+from sqlite_dissect.tests.utilities import db_file, parse_csv
 from sqlite_dissect.utilities import get_sqlite_files, parse_args
 
 
@@ -84,7 +84,7 @@ def test_schema_reporting(db_file):
     sys.stdout = parser_output
     args = parse_args([db_filepath])
     sqlite_files = get_sqlite_files(args.sqlite_path)
-    main(args, sqlite_files[0], len(sqlite_files) > 1)
+    main(args, str(sqlite_files[0]), len(sqlite_files) > 1)
 
     reported_tables = []
     reported_columns = {}
@@ -157,7 +157,7 @@ def test_row_recovery(db_file, tmp_path):
     sys.stdout = parser_output
     args = parse_args([db_filepath, '-c', '-e', 'csv', '--directory', str(tmp_path)])
     sqlite_files = get_sqlite_files(args.sqlite_path)
-    main(args, sqlite_files[0], len(sqlite_files) > 1)
+    main(args, str(sqlite_files[0]), len(sqlite_files) > 1)
 
     recovered_rows = []
 
@@ -183,7 +183,7 @@ def test_metadata_reporting(db_file):
     sys.stdout = parser_output
     args = parse_args([db_filepath, '-c'])
     sqlite_files = get_sqlite_files(args.sqlite_path)
-    main(args, sqlite_files[0], len(sqlite_files) > 1)
+    main(args, str(sqlite_files[0]), len(sqlite_files) > 1)
 
     current_table = None
     for line in parser_output.getvalue().splitlines():

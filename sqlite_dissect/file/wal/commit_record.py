@@ -181,7 +181,7 @@ class WriteAheadLogCommitRecord(Version):
             self.frames[frame.header.page_number] = frame
 
         # Set the updated page numbers derived from this commit records frame keys
-        self.updated_page_numbers = copy(self.frames.keys())
+        self.updated_page_numbers = copy(list(self.frames.keys()))
 
         log_message = "Commit Record Version: {} has the updated page numbers: {}."
         log_message = log_message.format(self.version_number, self.updated_page_numbers)

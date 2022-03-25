@@ -26,10 +26,9 @@ get_content_size(serial_type)
 """
 
 
-def decode_varint_in_reverse(byte_array, offset, max_varint_length=9):
+def decode_varint_in_reverse(byte_array: bytearray, offset: int, max_varint_length=9):
 
     """
-
     This function will move backwards through a byte array trying to decode a varint in reverse.  A InvalidVarIntError
     will be raised if a varint is not found by this algorithm used in this function.  The calling logic should check
     for this case in case it is encountered which is likely in the context of carving.
@@ -57,7 +56,6 @@ def decode_varint_in_reverse(byte_array, offset, max_varint_length=9):
                                  algorithm in this function.  This error is not logged as an error but rather a
                                  debug statement since it is very likely to occur during carving and should be handled
                                  appropriately.
-
     """
 
     if offset > len(byte_array):

@@ -44,7 +44,7 @@ class WriteAheadLog(object):
 
         frame_size = (WAL_FRAME_HEADER_LENGTH + self.file_handle.header.page_size)
 
-        self.number_of_frames = (self.file_handle.file_size - WAL_HEADER_LENGTH) / frame_size
+        self.number_of_frames = int((self.file_handle.file_size - WAL_HEADER_LENGTH) / frame_size)
 
         valid_frame_array = []
         invalid_frame_array = []
