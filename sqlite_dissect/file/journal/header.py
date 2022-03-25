@@ -40,7 +40,7 @@ class RollbackJournalHeader(SQLiteHeader):
 
         self.header_string = rollback_journal_header_byte_array[0:8]
 
-        if self.header_string != ROLLBACK_JOURNAL_HEADER_HEX_STRING.decode("hex"):
+        if self.header_string != ROLLBACK_JOURNAL_HEADER_HEX_STRING:
 
             """
 
@@ -52,12 +52,12 @@ class RollbackJournalHeader(SQLiteHeader):
             """
 
             log_message = "The header string is invalid."
-            logger.warn(log_message)
+            logger.warning(log_message)
             warn(log_message, RuntimeWarning)
 
         self.page_count = unpack(b">I", rollback_journal_header_byte_array[8:12])[0]
 
-        if rollback_journal_header_byte_array[8:12] == ROLLBACK_JOURNAL_HEADER_ALL_CONTENT.decode("hex"):
+        if rollback_journal_header_byte_array[8:12] == ROLLBACK_JOURNAL_HEADER_ALL_CONTENT:
             self.page_count = ROLLBACK_JOURNAL_ALL_CONTENT_UNTIL_END_OF_FILE
 
         self.random_nonce_for_checksum = unpack(b">I", rollback_journal_header_byte_array[12:16])[0]

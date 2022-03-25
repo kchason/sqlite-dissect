@@ -1,3 +1,4 @@
+import logging
 import uuid
 import warnings
 from logging import CRITICAL
@@ -229,7 +230,7 @@ def main(arguments, sqlite_file_path, export_sub_paths=False):
             raise SqliteError(f"Found a zero length SQLite file with a wal file: {arguments.wal}.  Unable to parse.")
 
         elif zero_length_wal_file:
-            print(f"File: {sqlite_file_path} with wal file: {wal_file_name} has no content.  Nothing to parse.")
+            logger.error(f"File: {sqlite_file_path} with wal file: {wal_file_name} has no content.  Nothing to parse.")
             exit(0)
 
         elif rollback_journal_file_name and not zero_length_rollback_journal_file:
@@ -246,13 +247,13 @@ def main(arguments, sqlite_file_path, export_sub_paths=False):
                 f"Unable to parse.")
 
         elif zero_length_rollback_journal_file:
-            print(
+            logger.error(
                 f"File: {sqlite_file_path} with rollback journal file: {rollback_journal_file_name} has no content. "
                 f"Nothing to parse.")
             exit(0)
 
         else:
-            print("File: {} has no content. Nothing to parse.".format(sqlite_file_path))
+            logger.error("File: {} has no content. Nothing to parse.".format(sqlite_file_path))
             exit(0)
 
     # Make sure that both of the journal files are not found
@@ -276,7 +277,7 @@ def main(arguments, sqlite_file_path, export_sub_paths=False):
             f"Only one journal file should exist. Unable to parse.")
 
     # Print a message parsing is starting and log the start time for reporting at the end on amount of time to run
-    print(f"\nParsing: {sqlite_file_path}...")
+    logger.info(f"\nParsing: {sqlite_file_path}...")
     start_time = time()
 
     # Create the database and wal/rollback journal file (if existent)
@@ -296,20 +297,21 @@ def main(arguments, sqlite_file_path, export_sub_paths=False):
     # Check if the header info was asked for
     if arguments.header:
         # Print the header info of the database
-        print("\nDatabase header information:\n{}".format(database.database_header.stringify(padding="\t")))
-        print("Continuing to parse...")
+        str_header = database.database_header.stringify(padding="\t")
+        logger.debug(f"\nDatabase header information:\n{str_header}")
+        logger.debug("Continuing to parse...")
 
     # Check if the master schema was asked for
     if arguments.schema:
         # print the master schema of the database
-        print(f"\nDatabase Master Schema:\n{stringify_master_schema_version(database)}")
-        print("Continuing to parse...")
+        logger.debug(f"\nDatabase Master Schema:\n{stringify_master_schema_version(database)}")
+        logger.debug("Continuing to parse...")
 
     # Check if the schema history was asked for
     if arguments.schema_history:
         # print the master schema version history
-        print(f"\nVersion History of Master Schemas:\n{stringify_master_schema_versions(version_history)}")
-        print("Continuing to parse...")
+        logger.debug(f"\nVersion History of Master Schemas:\n{stringify_master_schema_versions(version_history)}")
+        logger.debug("Continuing to parse...")
 
     # Get the signature options
     print_signatures = arguments.signatures
@@ -322,7 +324,7 @@ def main(arguments, sqlite_file_path, export_sub_paths=False):
     if not carve and carve_freelists:
         log_message = "The carve option was not set but the carve_freelists option was.  Disabling carve_freelists.  " \
                       "Please specify the carve option to enable."
-        logger.warn(log_message)
+        logger.warning(log_message)
         warn(log_message, RuntimeWarning)
 
     # Specific tables to be carved
@@ -333,8 +335,8 @@ def main(arguments, sqlite_file_path, export_sub_paths=False):
     if rollback_journal_exempted_tables and specified_tables_to_carve:
         for table in rollback_journal_exempted_tables:
             if table in specified_tables_to_carve:
-                print(f"Table: {table} found in both exempted and specified tables.  Please update the arguments "
-                      f"correctly.")
+                logger.error(f"Table: {table} found in both exempted and specified tables.  Please update the "
+                              f"arguments correctly.")
                 exit(0)
 
     # See if we need to generate signatures
@@ -385,7 +387,7 @@ def main(arguments, sqlite_file_path, export_sub_paths=False):
 
                 if print_signatures:
                     printable_signature = signatures[master_schema_entry.name].stringify("\t", False, False, False)
-                    print(f"\nSignature:\n{printable_signature}")
+                    logger.debug(f"\nSignature:\n{printable_signature}")
 
     """
     
@@ -461,7 +463,7 @@ def main(arguments, sqlite_file_path, export_sub_paths=False):
 
     # Carve the rollback journal if found and carving is not specified
     if rollback_journal_file and not carve:
-        print(f"Rollback journal file found: {rollback_journal_file}. Rollback journal file parsing is under "
+        logger.warning(f"Rollback journal file found: {rollback_journal_file}. Rollback journal file parsing is under "
               f"development and currently only supports carving. Please rerun with the --carve option for this output.")
 
     # Carve the rollback journal if found and carving is specified
@@ -469,21 +471,22 @@ def main(arguments, sqlite_file_path, export_sub_paths=False):
 
         if not output_directory:
 
-            print(f"Rollback journal file found: {rollback_journal_file}. Rollback journal file carving is under "
-                  f"development and currently only outputs to CSV. Due to this, the output directory needs to be "
-                  f"specified. Please rerun with a output directory specified in order for this to complete.")
+            logger.error(f"Rollback journal file found: {rollback_journal_file}. Rollback journal file carving is "
+                          f"under development and currently only outputs to CSV. Due to this, the output directory "
+                          f"needs to be specified. Please rerun with a output directory specified in order for this to "
+                          f"complete.")
 
         else:
 
-            print(f"Carving rollback journal file: {rollback_journal_file}. Rollback journal file carving is under "
-                  f"development and currently only outputs to CSV. Any export type specified will be overridden for "
-                  f"this.")
+            logger.error(f"Carving rollback journal file: {rollback_journal_file}. Rollback journal file carving is "
+                          f"under development and currently only outputs to CSV. Any export type specified will be "
+                          f"overridden for this.")
 
             carve_rollback_journal(output_directory, rollback_journal_file, rollback_journal_file_name,
                                    specified_tables_to_carve, rollback_journal_exempted_tables,
                                    version_history, signatures, logger)
 
-    print(f"Finished in {round(time() - start_time, 2)} seconds.")
+    logger.info(f"Finished in {round(time() - start_time, 2)} seconds.")
 
 
 def print_text(output_directory, file_prefix, carve, carve_freelists, specified_tables_to_carve,
@@ -588,8 +591,7 @@ def print_text(output_directory, file_prefix, carve, carve_freelists, specified_
 def print_csv(output_directory, file_prefix, carve, carve_freelists, specified_tables_to_carve,
               version_history, signatures, logger):
     # Export all index and table histories to csv files while supplying signature to carve with
-    print(f"\nExporting history as CSV to {output_directory}...")
-    logger.debug(f"Exporting history to {output_directory} as CSV.")
+    logger.info(f"Exporting history to {output_directory} as CSV.")
 
     commit_csv_exporter = CommitCsvExporter(output_directory, file_prefix)
 
@@ -608,7 +610,6 @@ def print_csv(output_directory, file_prefix, carve, carve_freelists, specified_t
                 if not signature and master_schema_entry.row_type is MASTER_SCHEMA_ROW_TYPE.TABLE \
                         and not master_schema_entry.without_row_id \
                         and not master_schema_entry.internal_schema_object:
-                    print(f"Unable to find signature for: {master_schema_entry.name}.  This table will not be carved.")
                     logger.error(f"Unable to find signature for: {master_schema_entry.name}.  This table will not be "
                                  f"carved.")
 
@@ -630,7 +631,6 @@ def print_sqlite(output_directory, file_prefix, carve, carve_freelists,
     file_postfix = "-sqlite-dissect.db3"
     sqlite_file_name = file_prefix + file_postfix
 
-    print("\nExporting history as SQLite to {}{}{}...".format(output_directory, sep, sqlite_file_name))
     logger.debug("Exporting history as SQLite to {}{}{}.".format(output_directory, sep, sqlite_file_name))
 
     with CommitSqliteExporter(output_directory, sqlite_file_name) as commit_sqlite_exporter:
@@ -650,8 +650,6 @@ def print_sqlite(output_directory, file_prefix, carve, carve_freelists,
                     if not signature and master_schema_entry.row_type is MASTER_SCHEMA_ROW_TYPE.TABLE \
                             and not master_schema_entry.without_row_id \
                             and not master_schema_entry.internal_schema_object:
-                        print("Unable to find signature for: {}.  This table will not be carved."
-                              .format(master_schema_entry.name))
                         logger.error("Unable to find signature for: {}.  This table will not be carved."
                                      .format(master_schema_entry.name))
 
@@ -673,7 +671,6 @@ def print_xlsx(output_directory, file_prefix, carve, carve_freelists, specified_
     xlsx_file_name = file_prefix + file_postfix
 
     # Export all index and table histories to a xlsx workbook while supplying signature to carve with
-    print("\nExporting history as XLSX to {}{}{}...".format(output_directory, sep, xlsx_file_name))
     logger.debug("Exporting history as XLSX to {}{}{}.".format(output_directory, sep, xlsx_file_name))
 
     with CommitXlsxExporter(output_directory, xlsx_file_name) as commit_xlsx_exporter:
@@ -693,8 +690,6 @@ def print_xlsx(output_directory, file_prefix, carve, carve_freelists, specified_
                     if not signature and master_schema_entry.row_type is MASTER_SCHEMA_ROW_TYPE.TABLE \
                             and not master_schema_entry.without_row_id \
                             and not master_schema_entry.internal_schema_object:
-                        print("Unable to find signature for: {}.  This table will not be carved."
-                              .format(master_schema_entry.name))
                         logger.error("Unable to find signature for: {}.  This table will not be carved."
                                      .format(master_schema_entry.name))
 
@@ -725,7 +720,6 @@ def carve_rollback_journal(output_directory, rollback_journal_file, rollback_jou
     """
 
     csv_prefix_rollback_journal_file_name = basename(normpath(rollback_journal_file_name))
-    print("Exporting rollback journal carvings as CSV to {}...".format(output_directory))
     logger.debug("Exporting rollback journal carvings as csv to output directory: {}.".format(output_directory))
 
     commit_csv_exporter = CommitCsvExporter(output_directory, csv_prefix_rollback_journal_file_name)
@@ -765,8 +759,6 @@ def carve_rollback_journal(output_directory, rollback_journal_file, rollback_jou
                     commit_csv_exporter.write_commit(master_schema_entry, commit)
 
             else:
-                print("Unable to find signature for: {}.  This table will not be carved from the rollback journal."
-                      .format(master_schema_entry.name))
                 logger.error("Unable to find signature for: {}.  This table will not be carved from the "
                              "rollback journal.".format(master_schema_entry.name))
 

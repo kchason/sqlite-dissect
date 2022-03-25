@@ -283,7 +283,7 @@ class VersionHistoryParser(VersionParser):
                 log_message = log_message.format(self.name, self.table_name, self.row_type, self.sql,
                                                  self.parser_starting_version_number, self.parser_ending_version_number,
                                                  MASTER_SCHEMA_ROW_TYPE.TABLE, signature.row_type)
-                logger.warn(log_message)
+                logger.warning(log_message)
                 warn(log_message, RuntimeWarning)
 
         # Set the signature

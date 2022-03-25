@@ -222,7 +222,7 @@ class FileHandle(object):
         if self.file_externally_controlled:
 
             log_message = "Ignored request to close externally controlled file."
-            self._logger.warn(log_message)
+            self._logger.warning(log_message)
             warn(log_message, RuntimeWarning)
 
         else:

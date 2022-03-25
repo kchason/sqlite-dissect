@@ -84,7 +84,7 @@ class Signature(VersionParser):
             log_message = log_message.format(master_schema_entry.root_page_number,
                                              master_schema_entry.row_type, master_schema_entry.name,
                                              master_schema_entry.table_name, master_schema_entry.sql)
-            logger.warn(log_message)
+            logger.warning(log_message)
             warn(log_message, RuntimeWarning)
 
             if master_schema_entry.internal_schema_object:
@@ -94,7 +94,7 @@ class Signature(VersionParser):
                 log_message = log_message.format(master_schema_entry.root_page_number,
                                                  master_schema_entry.row_type, master_schema_entry.name,
                                                  master_schema_entry.table_name, master_schema_entry.sql)
-                logger.warn(log_message)
+                logger.warning(log_message)
                 warn(log_message, RuntimeWarning)
 
         log_message = "Creating signature for master schema entry with name: {} table name: {} row type: {} and " \

@@ -226,7 +226,7 @@ class WriteAheadLogCommitRecord(Version):
                           "when parsing."
             log_message = log_message.format(len(self.page_version_index), self.database_size_in_pages,
                                              self.version_number, self.page_version_index)
-            self._logger.warn(log_message)
+            self._logger.warning(log_message)
             warn(log_message, RuntimeWarning)
 
         """
@@ -332,7 +332,7 @@ class WriteAheadLogCommitRecord(Version):
                 log_message = "The sqlite database root page was found in version: {} in the updated pages: {} when " \
                               "both the database header and the root b-tree page were not modified."
                 log_message = log_message.format(self.version_number, self.updated_page_numbers)
-                self._logger.warn(log_message)
+                self._logger.warning(log_message)
                 warn(log_message, RuntimeWarning)
 
         if not self.master_schema_modified:
@@ -416,7 +416,7 @@ class WriteAheadLogCommitRecord(Version):
                               "committed page size is {}.  Possibly erroneous use cases may occur when parsing."
                 log_message = log_message.format(self.version_number, last_database_header.database_size_in_pages,
                                                  self.committed_page_size)
-                self._logger.warn(log_message)
+                self._logger.warning(log_message)
                 warn(log_message, RuntimeWarning)
 
         if self.master_schema_modified:

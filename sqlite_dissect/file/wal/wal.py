@@ -175,7 +175,7 @@ class WriteAheadLog(object):
             log_message = "The wal file contains {} invalid frames.  Invalid frames are currently skipped and not " \
                           "implemented which may cause loss in possible carved data at this time until implemented."
             log_message = log_message.format(len(self.invalid_frames))
-            logger.warn(log_message)
+            logger.warning(log_message)
             warn(log_message, RuntimeWarning)
 
         self.last_frame_commit_record = None

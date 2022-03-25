@@ -147,7 +147,7 @@ class CommitXlsxExporter(object):
                                   "which is greater than the 31 allowed characters while writing to xlsx file name: {}."
                     log_message = log_message.format(commit.name, commit.page_type, len(commit.name),
                                                      self._xlsx_file_name)
-                    logger.warn(log_message)
+                    logger.warning(log_message)
                     raise ExportError(log_message)
 
         sheet = self._sheets[sheet_name] if sheet_name in self._sheets else None
@@ -229,7 +229,7 @@ class CommitXlsxExporter(object):
             log_message = "Invalid commit page type: {} found for xlsx export on master " \
                           "schema entry name: {} while writing to xlsx file name: {}."
             log_message = log_message.format(commit.page_type, commit.name, self._xlsx_file_name)
-            logger.warn(log_message)
+            logger.warning(log_message)
             raise ExportError(log_message)
 
     @staticmethod

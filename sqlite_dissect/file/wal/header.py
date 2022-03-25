@@ -66,7 +66,7 @@ class WriteAheadLogHeader(SQLiteHeader):
         if self.checkpoint_sequence_number != 0:
             log_message = "Checkpoint sequence number is {} instead of 0 and may cause inconsistencies in wal parsing."
             log_message = log_message.format(self.checkpoint_sequence_number)
-            logger.warn(log_message)
+            logger.warning(log_message)
             warn(log_message, RuntimeWarning)
 
         self.salt_1 = unpack(b">I", wal_header_byte_array[16:20])[0]

@@ -1622,7 +1622,7 @@ class OrdinaryTableRow(TableRow):
             log_message = "A table specified without a row id was found in table row with name: {} and sql: {}.  " \
                           "This use case is not fully implemented."
             log_message = log_message.format(self.name, self.sql)
-            logger.warn(log_message)
+            logger.warning(log_message)
             warn(log_message, RuntimeWarning)
 
     def stringify(self, padding="", print_record_columns=True,
@@ -1858,7 +1858,7 @@ class VirtualTableRow(TableRow):
         log_message = "Virtual table name: {} was found with module name: {} and sql: {}.  Virtual table modules are " \
                       "not fully implemented."
         log_message = log_message.format(self.name, self.module_name, self.sql)
-        logger.warn(log_message)
+        logger.warning(log_message)
         warn(log_message, RuntimeWarning)
 
         """
@@ -1989,7 +1989,7 @@ class IndexRow(MasterSchemaRow):
         if table_row.without_row_id:
             log_message = "Index row with name: {} and table name: {} was found to rely on a table without a row id."
             log_message = log_message.format(self.name, self.table_name)
-            logger.warn(log_message)
+            logger.warning(log_message)
             warn(log_message, RuntimeWarning)
 
         """
@@ -2034,7 +2034,7 @@ class IndexRow(MasterSchemaRow):
             log_message = "A index internal schema object found in index row with name: {} " \
                           "and sql: {}.  This is not fully implemented and may cause issues with index pages."
             log_message = log_message.format(self.name, self.sql)
-            logger.warn(log_message)
+            logger.warning(log_message)
             warn(log_message, RuntimeWarning)
 
         else:
@@ -2275,7 +2275,7 @@ class IndexRow(MasterSchemaRow):
                 log_message = "A index specified as a partial index was found in index row with name: {} " \
                               "and sql: {}.  This use case is not fully implemented."
                 log_message = log_message.format(self.name, self.sql)
-                logger.warn(log_message)
+                logger.warning(log_message)
                 warn(log_message, RuntimeWarning)
 
     def stringify(self, padding="", print_record_columns=True):

@@ -119,7 +119,7 @@ class VersionCsvExporter(object):
                         log_message = log_message.format(master_schema_entry.row_type, master_schema_entry.name,
                                                          master_schema_entry.table_name, master_schema_entry.sql)
 
-                        logger.warn(log_message)
+                        logger.warning(log_message)
                         raise ExportError(log_message)
 
     @staticmethod
@@ -563,7 +563,7 @@ class CommitCsvExporter(object):
                 log_message = "Invalid commit page type: {} found for csv export on master " \
                               "schema entry name: {} while writing to csv file name: {}."
                 log_message = log_message.format(commit.page_type, commit.name, csv_file_name)
-                logger.warn(log_message)
+                logger.warning(log_message)
                 raise ExportError(log_message)
 
     @staticmethod

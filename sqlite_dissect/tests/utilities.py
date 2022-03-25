@@ -168,7 +168,7 @@ def db_file(request, tmp_path):
                 modified_rows.append(cursor.fetchone())
 
             update_statement = generate_update_statement(request.param['table_name'], request.param['columns'])
-            cursor.executemany(update_statement, row_values)
+            cursor.executemany(update_statement, row_list)
             db.commit()
 
         if request.param['delete'] > 0:

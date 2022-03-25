@@ -168,7 +168,7 @@ class CommitSqliteExporter(object):
                                   "found for sqlite export on master schema entry name: {} page type: {} " \
                                   "while writing to sqlite file name: {}."
                     log_message = log_message.format(len(cells), commit.name, commit.page_type, self._sqlite_file_name)
-                    logger.warn(log_message)
+                    logger.warning(log_message)
                     raise ExportError(log_message)
 
                 number_of_columns = len(cells[0].payload.record_columns)
@@ -207,7 +207,7 @@ class CommitSqliteExporter(object):
                 log_message = "Invalid commit page type: {} found for sqlite export on master " \
                               "schema entry name: {} while writing to sqlite file name: {}."
                 log_message = log_message.format(commit.page_type, commit.name, self._sqlite_file_name)
-                logger.warn(log_message)
+                logger.warning(log_message)
                 raise ExportError(log_message)
 
             create_table_statement = "CREATE TABLE {} ({})"
@@ -266,7 +266,7 @@ class CommitSqliteExporter(object):
             log_message = "Invalid commit page type: {} found for sqlite export on master " \
                           "schema entry name: {} while writing to sqlite file name: {}."
             log_message = log_message.format(commit.page_type, commit.name, self._sqlite_file_name)
-            logger.warn(log_message)
+            logger.warning(log_message)
             raise ExportError(log_message)
 
         """

@@ -211,7 +211,7 @@ class DatabaseHeader(SQLiteHeader):
             """
 
             log_message = "Schema format number and database text encoding are 0 indicating no schema or data."
-            logger.warn(log_message)
+            logger.warning(log_message)
             warn(log_message, RuntimeWarning)
 
         else:
