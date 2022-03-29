@@ -250,7 +250,7 @@ def generate_signature_regex(signature, skip_first_serial_type=False):
                 elif column_serial_type == -2:
                     text_regex = generate_regex_for_simplified_serial_type(column_serial_type)
                 else:
-                    basic_serial_type_regex += generate_regex_for_simplified_serial_type(column_serial_type)
+                    basic_serial_type_regex += generate_regex_for_simplified_serial_type(column_serial_type).decode()
 
             if blob_regex or text_regex:
 

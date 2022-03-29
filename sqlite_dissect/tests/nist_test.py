@@ -29,8 +29,6 @@ def test_header_reporting(db_file):
     db_filepath = str(db_file[0].resolve())
     hash_before_parsing = get_md5_hash(db_filepath)
 
-    parser_output = io.BytesIO()
-    sys.stdout = parser_output
     args = parse_args([db_filepath, '--header'])
     sqlite_files = get_sqlite_files(args.sqlite_path)
     main(args, sqlite_files[0], len(sqlite_files) > 1)
@@ -40,7 +38,7 @@ def test_header_reporting(db_file):
     reported_journal_mode_write = None
     reported_num_pages = None
     reported_encoding = None
-    for line in parser_output.getvalue().splitlines():
+    for line in sys.stdout.read().splitlines():
         line = str(line)
         if "FILE FORMAT WRITE VERSION" in line.upper():
             reported_journal_mode_write = line.split(': ')[1].strip()
@@ -80,8 +78,6 @@ def test_schema_reporting(db_file):
     db_filepath = str(db_file[0].resolve())
     hash_before_parsing = get_md5_hash(db_filepath)
 
-    parser_output = io.BytesIO()
-    sys.stdout = parser_output
     args = parse_args([db_filepath])
     sqlite_files = get_sqlite_files(args.sqlite_path)
     main(args, str(sqlite_files[0]), len(sqlite_files) > 1)
@@ -91,7 +87,7 @@ def test_schema_reporting(db_file):
     reported_num_rows = {}
     current_table = None
     row_count = 0
-    for line in parser_output.getvalue().splitlines():
+    for line in sys.stdout.read().splitlines():
         line = str(line)
         if "Master schema entry: " in line and "row type: table" in line:
             current_table = line[line.find("Master schema entry: "):line.find("row type: ")].split(': ')[1].strip()
@@ -179,14 +175,12 @@ def test_metadata_reporting(db_file):
     db_filepath = str(db_file[0].resolve())
     hash_before_parsing = get_md5_hash(db_filepath)
 
-    parser_output = io.BytesIO()
-    sys.stdout = parser_output
     args = parse_args([db_filepath, '-c'])
     sqlite_files = get_sqlite_files(args.sqlite_path)
     main(args, str(sqlite_files[0]), len(sqlite_files) > 1)
 
     current_table = None
-    for line in parser_output.getvalue().splitlines():
+    for line in sys.stdout.read().splitlines():
         line = str(line)
         if "Master schema entry: " in line and "row type: table" in line:
             current_table = line[line.find("Master schema entry: "):line.find("row type: ")].split(': ')[1].strip()

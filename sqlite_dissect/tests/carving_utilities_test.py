@@ -25,7 +25,7 @@ varint_tuples = [
 @pytest.mark.parametrize('value, encoded_value', varint_tuples)
 def test_decode_varint_in_reverse(value, encoded_value):
     with pytest.raises(ValueError):
-        decode_varint_in_reverse(bytearray('0'*9), 11)
+        decode_varint_in_reverse(bytearray(b'0'*9), 11)
 
     assert decode_varint_in_reverse(encoded_value, len(encoded_value))[0] == value
 
