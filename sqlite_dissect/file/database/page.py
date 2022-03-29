@@ -302,7 +302,7 @@ class FreelistTrunkPage(Page):
                                                                FREELIST_HEADER_LENGTH])[0]
         self.freelist_leaf_page_numbers = []
         self.freelist_leaf_pages = []
-        for index in range(self.number_of_leaf_page_pointers):
+        for index in range(int(self.number_of_leaf_page_pointers)):
             start_offset = index * FREELIST_LEAF_PAGE_NUMBER_LENGTH + FREELIST_HEADER_LENGTH
             end_offset = start_offset + FREELIST_LEAF_PAGE_NUMBER_LENGTH
             freelist_leaf_page_number = unpack(b">I", page[start_offset:end_offset])[0]
@@ -424,7 +424,7 @@ class PointerMapPage(Page):
         self.md5_hex_digest = get_md5_hash(page)
 
         self.pointer_map_entries = []
-        for index in range(self.number_of_entries):
+        for index in range(int(self.number_of_entries)):
 
             offset = index * POINTER_MAP_ENTRY_LENGTH
 
@@ -657,7 +657,7 @@ class BTreePage(Page):
 
         self.cells = []
         self.calculated_cell_total_byte_size = 0
-        for cell_index in range(self.header.number_of_cells_on_page):
+        for cell_index in range(int(self.header.number_of_cells_on_page)):
             cell_start_offset = cell_pointer_array_offset + cell_index * CELL_POINTER_BYTE_LENGTH
             cell_end_offset = cell_start_offset + CELL_POINTER_BYTE_LENGTH
             cell_offset = unpack(b">H", page[cell_start_offset:cell_end_offset])[0]

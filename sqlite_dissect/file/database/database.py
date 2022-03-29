@@ -174,7 +174,7 @@ class Database(Version):
 
         """
 
-        self.updated_page_numbers = [page_index + 1 for page_index in range(self.database_size_in_pages)]
+        self.updated_page_numbers = [page_index + 1 for page_index in range(int(self.database_size_in_pages))]
         self.page_version_index = dict(map(lambda x: [x, self.version_number], self.updated_page_numbers))
 
         self._logger.debug("Updated page numbers initialized as: {} in version: {}.".format(self.updated_page_numbers,

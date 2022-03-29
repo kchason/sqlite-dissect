@@ -268,7 +268,7 @@ class Version(object):
             self._logger.error(log_message)
             raise VersionParsingError(log_message)
 
-        for page_number in [page_index + 1 for page_index in range(self.database_size_in_pages)]:
+        for page_number in [page_index + 1 for page_index in range(int(self.database_size_in_pages))]:
             if page_number not in pages:
                 log_message = "Page number: {} was not found in the pages: {} for version: {}."
                 log_message = log_message.format(page_number, pages.keys(), self.version_number)

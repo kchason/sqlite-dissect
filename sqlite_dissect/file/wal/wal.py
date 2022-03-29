@@ -78,7 +78,7 @@ class WriteAheadLog(object):
         # Initialize the dictionary
         self.invalid_frame_indices = {}
 
-        for frame_index in range(self.number_of_frames):
+        for frame_index in range(int(self.number_of_frames)):
 
             frame = WriteAheadLogFrame(self.file_handle, frame_index, commit_record_number)
 
