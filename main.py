@@ -58,6 +58,9 @@ def main(arguments, sqlite_file_path, export_sub_paths=False):
 
     :param arguments: the object of key => value arguments that have been provided as the runtime configuration in which
         the SQLite Dissect tool should run.
+    :param sqlite_file_path: the string path to the SQLite file or directory being processed.
+    :param export_sub_paths: the boolean determination of whether to generate subdirectories for the output for each
+        SQLite file being processed.
     """
     # Handle the logging and warning settings
     if not arguments.log_level:
