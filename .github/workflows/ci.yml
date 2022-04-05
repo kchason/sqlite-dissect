@@ -22,6 +22,14 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
+          
+      - name: Test Env Assignment
+        run: |
+          echo ${{github.ref_name}}
+          echo ${GITHUB_REF}
+          echo "RELEASE_VERSION=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
+          echo ${GITHUB_ENV}
+          echo ${RELEASE_VERSION}
 
       # Install the packages to build the SQLite Dissect package
       - name: Prepare Build Environment
