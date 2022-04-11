@@ -142,7 +142,7 @@ class Version(object):
         return self.__str__()
 
     def __str__(self):
-        return sub("\t", "", sub("\n", " ", self.stringify()))
+        return self.stringify().replace('\t', '').replace('\n', ' ')
 
     def stringify(self, padding="", print_pages=True, print_schema=True):
         string = padding + "File Type: {}\n" \

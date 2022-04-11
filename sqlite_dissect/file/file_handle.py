@@ -182,7 +182,7 @@ class FileHandle(object):
         return self.__str__()
 
     def __str__(self):
-        return sub("\t", "", sub("\n", " ", self.stringify()))
+        return self.stringify().replace('\t', '').replace('\n', ' ')
 
     def stringify(self, padding="", print_header=True):
         string = padding + "File Type: {}\n" \

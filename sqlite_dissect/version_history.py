@@ -200,7 +200,7 @@ class VersionHistory(object):
         return self.__str__()
 
     def __str__(self):
-        return sub("\t", "", sub("\n", " ", self.stringify()))
+        return self.stringify().replace('\t', '').replace('\n', ' ')
 
     def stringify(self, padding="", print_versions=True):
         string = "File Type: {}"
@@ -403,7 +403,7 @@ class VersionHistoryParser(VersionParser):
             return self.next()
 
         def __str__(self):
-            return sub("\t", "", sub("\n", " ", self.stringify()))
+            return self.stringify().replace('\t', '').replace('\n', ' ')
 
         def stringify(self, padding="", print_cells=True):
             string = padding + "Page Type: {}\n" \
@@ -779,7 +779,7 @@ class Commit(object):
         return self.__str__()
 
     def __str__(self):
-        return sub("\t", "", sub("\n", " ", self.stringify()))
+        return self.stringify().replace('\t', '').replace('\n', ' ')
 
     def stringify(self, padding="", print_cells=True):
         string = padding + "Version Number: {}\n" \

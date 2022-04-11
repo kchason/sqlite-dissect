@@ -823,7 +823,7 @@ class SchemaColumnSignature(object):
         return self.__str__()
 
     def __str__(self):
-        return sub("\t", "", sub("\n", " ", self.stringify()))
+        return self.stringify().replace('\t', '').replace('\n', ' ')
 
     def stringify(self, padding=""):
         string = padding + "Derived Data Type Name: {}\n" \
@@ -920,7 +920,7 @@ class TableColumnSignature(object):
         return self.__str__()
 
     def __str__(self):
-        return sub("\t", "", sub("\n", " ", self.stringify()))
+        return self.stringify().replace('\t', '').replace('\n', ' ')
 
     def stringify(self, padding="", print_column_signatures=True):
         string = padding + "Index: {}\n" \
@@ -1101,7 +1101,7 @@ class TableRowSignature(object):
         return self.__str__()
 
     def __str__(self):
-        return sub("\t", "", sub("\n", " ", self.stringify()))
+        return self.stringify().replace('\t', '').replace('\n', ' ')
 
     def stringify(self, padding="", print_column_signatures=True):
         string = padding + "Record Serial Type Signature: {}\n" \
@@ -1314,7 +1314,7 @@ class ColumnSignature(object):
         return self.__str__()
 
     def __str__(self):
-        return sub("\t", "", sub("\n", " ", self.stringify()))
+        return self.stringify().replace('\t', '').replace('\n', ' ')
 
     def stringify(self, padding=""):
         string = padding + "Index: {}\n" \

@@ -293,7 +293,7 @@ class MasterSchema(object):
         return self.__str__()
 
     def __str__(self):
-        return sub("\t", "", sub("\n", " ", self.stringify()))
+        return self.stringify().replace('\t', '').replace('\n', ' ')
 
     def stringify(self, padding="", print_master_schema_root_page=True,
                   print_master_schema_entries=True, print_b_tree_root_pages=True):
@@ -595,7 +595,7 @@ class MasterSchemaRow(object):
         return self.__str__()
 
     def __str__(self):
-        return sub("\t", "", sub("\n", " ", self.stringify()))
+        return self.stringify().replace('\t', '').replace('\n', ' ')
 
     def stringify(self, padding="", print_record_columns=True):
         string = padding + "Version Number: {}\n" \
