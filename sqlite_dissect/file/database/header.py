@@ -2,7 +2,6 @@ from abc import ABCMeta
 from binascii import hexlify
 from logging import getLogger
 from re import compile
-from re import sub
 from struct import error
 from struct import unpack
 from warnings import warn
@@ -12,7 +11,6 @@ from sqlite_dissect.constants import LEAF_PAGE_HEADER_LENGTH
 from sqlite_dissect.constants import LEAF_PAYLOAD_FRACTION
 from sqlite_dissect.constants import LOGGER_NAME
 from sqlite_dissect.constants import MAGIC_HEADER_STRING
-from sqlite_dissect.constants import MAGIC_HEADER_STRING_ENCODING
 from sqlite_dissect.constants import MASTER_PAGE_HEX_ID
 from sqlite_dissect.constants import MAXIMUM_EMBEDDED_PAYLOAD_FRACTION
 from sqlite_dissect.constants import MAXIMUM_PAGE_SIZE

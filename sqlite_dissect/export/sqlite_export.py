@@ -2,7 +2,6 @@ from logging import getLogger
 from os import rename
 from os.path import exists
 from os.path import sep
-from re import sub
 from sqlite3 import connect
 from sqlite3 import sqlite_version
 from sqlite3 import version
@@ -177,7 +176,7 @@ class CommitSqliteExporter(object):
                     index_column_headers.append("Column {}".format(i))
 
                 column_headers.extend(index_column_headers)
-                column_headers = [sub(" ", "_", column_header).lower() for column_header in column_headers]
+                column_headers = [column_header.replace(" ", "_").lower() for column_header in column_headers]
 
             elif commit.page_type == PAGE_TYPE.B_TREE_TABLE_LEAF:
 
@@ -194,7 +193,7 @@ class CommitSqliteExporter(object):
 
                 updated_column_headers = []
                 for column_header in column_headers:
-                    updated_column_header_name = "sd_" + sub(" ", "_", column_header).lower()
+                    updated_column_header_name = "sd_" + column_header.replace(" ", "_").lower()
                     while updated_column_header_name in column_definitions:
                         updated_column_header_name = "sd_" + updated_column_header_name
                     updated_column_headers.append(updated_column_header_name)
@@ -348,9 +347,7 @@ class CommitSqliteExporter(object):
                     text_affinity = True if serial_type >= 13 and serial_type % 2 == 1 else False
                     value = record_column.value
 
-                    if value is None:
-                        pass
-                    elif isinstance(value, bytearray):
+                    if isinstance(value, bytearray):
                         if text_affinity:
                             value = value.decode(database_text_encoding, "replace")
                         else:

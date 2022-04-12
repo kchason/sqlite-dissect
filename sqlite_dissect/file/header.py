@@ -1,7 +1,6 @@
 from abc import ABCMeta
 from abc import abstractmethod
 from logging import getLogger
-from re import sub
 from sqlite_dissect.constants import LOGGER_NAME
 
 """

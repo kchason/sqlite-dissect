@@ -1,4 +1,3 @@
-from re import sub
 from sqlite_dissect.constants import FILE_TYPE
 from sqlite_dissect.file.file_handle import FileHandle
 

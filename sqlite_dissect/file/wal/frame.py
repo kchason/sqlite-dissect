@@ -1,6 +1,5 @@
 from binascii import hexlify
 from logging import getLogger
-from re import sub
 from sqlite_dissect.constants import FILE_TYPE
 from sqlite_dissect.constants import LOGGER_NAME
 from sqlite_dissect.constants import MASTER_PAGE_HEX_ID

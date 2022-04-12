@@ -1,5 +1,4 @@
 from logging import getLogger
-from re import sub
 from sqlite_dissect.constants import LOGGER_NAME
 from sqlite_dissect.exception import MasterSchemaRowParsingError
 

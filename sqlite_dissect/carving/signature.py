@@ -2,7 +2,6 @@ from abc import ABCMeta
 from abc import abstractmethod
 from copy import copy
 from logging import getLogger
-from re import sub
 from warnings import warn
 from sqlite_dissect.carving.utilities import get_content_size
 from sqlite_dissect.constants import LOGGER_NAME

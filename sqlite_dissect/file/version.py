@@ -2,7 +2,6 @@ from abc import ABCMeta
 from abc import abstractmethod
 from binascii import hexlify
 from logging import getLogger
-from re import sub
 from sqlite_dissect.constants import INDEX_INTERIOR_PAGE_HEX_ID
 from sqlite_dissect.constants import INDEX_LEAF_PAGE_HEX_ID
 from sqlite_dissect.constants import LOGGER_NAME

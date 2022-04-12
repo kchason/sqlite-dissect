@@ -1,6 +1,5 @@
 from abc import ABCMeta
 from logging import getLogger
-from re import sub
 from warnings import warn
 from sqlite_dissect.constants import BASE_VERSION_NUMBER
 from sqlite_dissect.constants import LOGGER_NAME

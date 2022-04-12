@@ -1,7 +1,6 @@
 from abc import ABCMeta
 from binascii import hexlify
 from logging import getLogger
-from re import sub
 from struct import unpack
 from warnings import warn
 from sqlite_dissect.constants import CELL_LOCATION
@@ -593,7 +592,7 @@ class BTreePage(Page):
             else:
                 log_message = "Page hex type for master page is: {} and not a table interior or table leaf page as " \
                               "expected in b-tree page: {} in page version: {} for version: {}."
-                log_message = log_message.format(hex(master_page_hex_type), self.number,
+                log_message = log_message.format(master_page_hex_type, self.number,
                                                  self.page_version_number, self.version_number)
                 self._logger.error(log_message)
                 raise BTreePageParsingError(log_message)

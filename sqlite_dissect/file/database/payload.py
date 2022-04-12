@@ -1,7 +1,6 @@
 from abc import ABCMeta
 from binascii import hexlify
 from logging import getLogger
-from re import sub
 from sqlite_dissect.constants import LOGGER_NAME
 from sqlite_dissect.exception import RecordParsingError
 from sqlite_dissect.utilities import decode_varint

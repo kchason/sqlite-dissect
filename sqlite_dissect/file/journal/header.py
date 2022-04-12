@@ -1,7 +1,6 @@
 from binascii import hexlify
 from logging import getLogger
 from struct import unpack
-from re import sub
 from warnings import warn
 from sqlite_dissect.constants import LOGGER_NAME
 from sqlite_dissect.constants import ROLLBACK_JOURNAL_ALL_CONTENT_UNTIL_END_OF_FILE
@@ -41,7 +40,6 @@ class RollbackJournalHeader(SQLiteHeader):
         self.header_string = rollback_journal_header_byte_array[0:8]
 
         if self.header_string != ROLLBACK_JOURNAL_HEADER_HEX_STRING:
-
             """
 
             Instead of throwing an error here, a warning is thrown instead.  This is due to the fact that the header
@@ -85,14 +83,8 @@ class RollbackJournalHeader(SQLiteHeader):
 
 class RollbackJournalPageRecordHeader(object):
 
-    def __init__(self):
-        pass
-
     def __repr__(self):
         return self.__str__()
 
     def __str__(self):
         return self.stringify().replace('\t', '').replace('\n', ' ')
-
-    def stringify(self, padding=""):
-        pass

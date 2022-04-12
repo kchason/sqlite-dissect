@@ -587,7 +587,7 @@ class MasterSchemaRow(object):
 
         """
 
-        master_schema_entry_identifier_string = "{}{}{}{}".format(self.row_id, self.row_type, self.name,
+        master_schema_entry_identifier_string = "{}{}{}{}{}".format(self.row_id, self.row_type, self.name,
                                                                   self.table_name, self.sql)
         self.md5_hash_identifier = get_md5_hash(master_schema_entry_identifier_string)
 

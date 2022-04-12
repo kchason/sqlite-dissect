@@ -430,7 +430,7 @@ class ColumnDefinition(object):
         derived_data_type = sub("\(.*\)$", "", derived_data_type)
 
         # Replace spaces with underscores
-        derived_data_type = sub(" ", "_", derived_data_type)
+        derived_data_type = derived_data_type.replace(" ", "_")
 
         for data_type in DATA_TYPE:
 

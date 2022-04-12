@@ -1,5 +1,4 @@
 from logging import getLogger
-from re import sub
 from struct import unpack
 from sqlite_dissect.constants import FILE_TYPE
 from sqlite_dissect.constants import LOGGER_NAME
