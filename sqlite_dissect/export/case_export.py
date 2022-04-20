@@ -10,7 +10,7 @@ from datetime import datetime
 from os import path
 from typing import Optional
 
-from _version import __version__
+from sqlite_dissect._version import __version__
 from sqlite_dissect.utilities import hash_file
 
 
