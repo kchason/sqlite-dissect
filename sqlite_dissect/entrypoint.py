@@ -1,19 +1,8 @@
 import uuid
 import warnings
-from logging import CRITICAL
-from logging import DEBUG
-from logging import ERROR
-from logging import INFO
-from logging import WARNING
-from logging import basicConfig
-from logging import getLogger
+from logging import CRITICAL, DEBUG, ERROR, INFO, WARNING, basicConfig, getLogger
 from os import path
-from os.path import basename, abspath
-from os.path import join
-from os.path import exists
-from os.path import getsize
-from os.path import normpath
-from os.path import sep
+from os.path import basename, abspath, join, exists, getsize, normpath, sep
 from time import time
 from warnings import warn
 from sqlite_dissect.carving.rollback_journal_carver import RollBackJournalCarver
@@ -301,6 +290,9 @@ def main(arguments, sqlite_file_path: str, export_sub_paths=False):
         # Print the header info of the database
         str_header = database.database_header.stringify(padding="\t")
         logger.debug(f"\nDatabase header information:\n{str_header}")
+        # Print to stdout if the "text" output option was selected
+        if not export_types or EXPORT_TYPES.TEXT in export_types:
+            print(f"\nDatabase header information:\n{str_header}")
         logger.debug("Continuing to parse...")
 
     # Check if the master schema was asked for
