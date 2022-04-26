@@ -146,7 +146,7 @@ def main(arguments, sqlite_file_path: str, export_sub_paths=False):
     output_directory = None
     if arguments.directory:
         if not exists(arguments.directory):
-            raise SqliteError(f"Unable to find output directory: {args.directory}.")
+            raise SqliteError(f"Unable to find output directory: {arguments.directory}.")
         output_directory = arguments.directory
         # Determine if there are sub-paths being configured for exports
         if export_sub_paths:
@@ -192,7 +192,7 @@ def main(arguments, sqlite_file_path: str, export_sub_paths=False):
         elif arguments.rollback_journal:
             if not exists(arguments.rollback_journal):
                 raise SqliteError(f"Unable to find rollback journal file: {arguments.rollback_journal}.")
-            rollback_journal_file_name = args.rollback_journal
+            rollback_journal_file_name = arguments.rollback_journal
         else:
             if exists(sqlite_file_path + WAL_FILE_POSTFIX):
                 wal_file_name = sqlite_file_path + WAL_FILE_POSTFIX
