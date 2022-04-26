@@ -39,9 +39,9 @@ def assert_file_exists(file_path):
 
 # SFT-CA-03
 def assert_correct_page_size(reported_size, correct_size):
-    assert reported_size == correct_size, "The program reports an incorrect page size!\nCorrect page size: %d\n" \
-                                          "Reported page size: %d" % (correct_size, reported_size)
-
+    assert reported_size == correct_size, "The program reports an incorrect page size!\n" \
+                                          f"Correct page size: {correct_size}\n" \
+                                          f"Reported page size: {reported_size}"
 
 # SFT-CA-04
 # SFT-CA-05

@@ -163,6 +163,9 @@ def stringify_cell_record(cell, database_text_encoding, page_type):
                     column_values.append(str(value))
             else:
                 column_values.append("NULL")
+
+        # Convert any binary strings into regular strings else it can't be joined properly
+        column_values = [decode_str(s) for s in column_values]
         content = "(" + ", ".join(column_values) + ")"
         return content
 
