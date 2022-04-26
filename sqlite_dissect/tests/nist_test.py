@@ -1,10 +1,10 @@
 import sqlite3
-import sqlite_dissect.tests.nist_assertions
-from hashlib import md5
-from sqlite_dissect.entrypoint import main
 import io
 import sys
 import pytest
+
+from hashlib import md5
+from sqlite_dissect.entrypoint import main
 from sqlite_dissect.constants import FILE_TYPE
 from sqlite_dissect.tests import nist_assertions
 from sqlite_dissect.tests.utilities import db_file, parse_csv

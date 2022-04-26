@@ -2,8 +2,8 @@ import pytest
 import sqlite3
 import random
 import string
-from collections import OrderedDict
 import uuid
+from collections import OrderedDict
 
 
 default_columns = OrderedDict(

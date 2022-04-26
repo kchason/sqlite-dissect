@@ -4,16 +4,11 @@ from binascii import hexlify
 from hashlib import md5
 from logging import getLogger
 from re import compile
-from struct import pack
-from struct import unpack
+from struct import pack, unpack
 from os import walk, makedirs, path
 from os.path import exists, isdir, join
 from sqlite_dissect.constants import ALL_ZEROS_REGEX, SQLITE_DATABASE_HEADER_LENGTH, MAGIC_HEADER_STRING, \
-    MAGIC_HEADER_STRING_ENCODING, SQLITE_FILE_EXTENSIONS
-from sqlite_dissect.constants import LOGGER_NAME
-from sqlite_dissect.constants import OVERFLOW_HEADER_LENGTH
-from sqlite_dissect.constants import BLOB_SIGNATURE_IDENTIFIER
-from sqlite_dissect.constants import TEXT_SIGNATURE_IDENTIFIER
+    SQLITE_FILE_EXTENSIONS, LOGGER_NAME, OVERFLOW_HEADER_LENGTH, BLOB_SIGNATURE_IDENTIFIER, TEXT_SIGNATURE_IDENTIFIER
 from sqlite_dissect.exception import InvalidVarIntError
 from sqlite_dissect._version import __version__
 from configargparse import ArgParser

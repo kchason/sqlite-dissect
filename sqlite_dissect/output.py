@@ -1,13 +1,8 @@
 from binascii import hexlify
 from logging import getLogger
-from sqlite_dissect.constants import LOGGER_NAME
-from sqlite_dissect.constants import PAGE_TYPE
-from sqlite_dissect.constants import UTF_8
-from sqlite_dissect.file.database.page import BTreePage
-from sqlite_dissect.file.database.page import IndexInteriorPage
-from sqlite_dissect.file.database.page import IndexLeafPage
-from sqlite_dissect.file.database.page import TableInteriorPage
-from sqlite_dissect.file.database.page import TableLeafPage
+from sqlite_dissect.constants import LOGGER_NAME, PAGE_TYPE, UTF_8
+from sqlite_dissect.file.database.page import BTreePage, IndexInteriorPage, IndexLeafPage, TableInteriorPage, \
+    TableLeafPage
 from sqlite_dissect.exception import OutputError
 from sqlite_dissect.utilities import has_content, decode_str
 

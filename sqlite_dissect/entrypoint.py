@@ -1,4 +1,3 @@
-import logging
 import uuid
 import warnings
 from logging import CRITICAL
