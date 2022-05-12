@@ -1,4 +1,8 @@
 import sqlite3
+from sqlite_dissect.tests.constants import LOG_FILES
+import sqlite_dissect.tests.nist_assertions as nist_assertions
+from hashlib import md5
+from sqlite_dissect.entrypoint import main
 import io
 import sys
 import pytest
@@ -75,7 +79,7 @@ def test_header_reporting(db_file):
 
 
 # SFT-02
-def test_schema_reporting(db_file):
+def test_schema_reporting(db_file, tmp_path):
     if 'SFT-01' not in db_file[0].name:
         pytest.skip("Skipping SFT-03 db's")
 
@@ -84,15 +88,20 @@ def test_schema_reporting(db_file):
 
     args = parse_args([db_filepath])
     sqlite_files = get_sqlite_files(args.sqlite_path)
-    with redirect_stdout(io.StringIO()) as output:
-        main(args, str(sqlite_files[0]), len(sqlite_files) > 1)
+    log_file = tmp_path / "log.txt"
 
-        reported_tables = []
-        reported_columns = {}
-        reported_num_rows = {}
-        current_table = None
-        row_count = 0
-        for line in output.getvalue().splitlines():
+    with open(str(log_file), 'w') as stdout:
+        sys.stdout = stdout
+        main(args, sqlite_files[0], len(sqlite_files) > 1)
+
+    reported_tables = []
+    reported_columns = {}
+    reported_num_rows = {}
+    current_table = None
+    row_count = 0
+    with open(str(log_file), 'r') as stdout:
+        for line in stdout:
+            line = line.strip()
             if "Master schema entry: " in line and "row type: table" in line:
                 current_table = line[line.find("Master schema entry: "):line.find("row type: ")].split(': ')[1].strip()
                 reported_tables.append(current_table)
@@ -153,9 +162,8 @@ def test_row_recovery(db_file, tmp_path):
     rows_to_recover = db_file[1]
     hash_before_parsing = get_md5_hash(db_filepath)
 
-    parser_output = io.BytesIO()
-    sys.stdout = parser_output
-    args = parse_args([db_filepath, '-c', '-e', 'csv', '--directory', str(tmp_path)])
+    args = parse_args([db_filepath, '-c',
+    '-e', 'csv', '--directory', str(tmp_path)])
     sqlite_files = get_sqlite_files(args.sqlite_path)
     main(args, str(sqlite_files[0]), len(sqlite_files) > 1)
 
@@ -179,13 +187,13 @@ def test_metadata_reporting(db_file):
     db_filepath = str(db_file[0].resolve())
     hash_before_parsing = get_md5_hash(db_filepath)
 
+    parser_output = sys.stdout
     args = parse_args([db_filepath, '-c'])
     sqlite_files = get_sqlite_files(args.sqlite_path)
     main(args, str(sqlite_files[0]), len(sqlite_files) > 1)
 
     current_table = None
-    for line in sys.stdout.read().splitlines():
-        line = str(line)
+    for line in parser_output.read().splitlines():
         if "Master schema entry: " in line and "row type: table" in line:
             current_table = line[line.find("Master schema entry: "):line.find("row type: ")].split(': ')[1].strip()
 
