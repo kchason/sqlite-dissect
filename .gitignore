@@ -6,6 +6,9 @@
 # VS Code Files
 .vscode
 
+# VS files
+.vs
+
 # Python Files
 *.pyc
 *.pyo
@@ -33,8 +36,5 @@
 /.pytest_cache
 /htmlcov
 /docs/build
-sqlite_dissect/tests/log_files/
-sqlite_dissect/tests/reports/
-test_files/
 *.coverage
 
