@@ -59,17 +59,17 @@ def get_pointer_map_entries_breakdown(version):
         last_page_number = pointer_map_page.number + 1
         last_entry = None
         for entry in pointer_map_page.pointer_map_entries:
-            if hexlify(last_type_seen) != hexlify(entry.page_type):
+            if hexlify(str.encode(last_type_seen)) != hexlify(str.encode(entry.page_type)):
                 pages = entry.page_number - last_page_number
                 breakdown = (pointer_map_page.number, last_page_number, entry.page_number - 1,
-                             pages, hexlify(last_entry.page_type))
+                             pages, hexlify(str.encode(last_entry.page_type)))
                 pointer_map_entries_breakdown.append(breakdown)
                 last_page_number = entry.page_number
             last_type_seen = entry.page_type
             last_entry = entry
         pages = last_entry.page_number - last_page_number + 1
         breakdown = (pointer_map_page.number, last_page_number, last_entry.page_number,
-                     pages, hexlify(last_entry.page_type))
+                     pages, hexlify(str.encode(last_entry.page_type)))
         pointer_map_entries_breakdown.append(breakdown)
 
     return pointer_map_entries_breakdown
