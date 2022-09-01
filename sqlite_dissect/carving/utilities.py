@@ -215,7 +215,7 @@ def generate_signature_regex(signature, skip_first_serial_type=False):
 
     """
 
-    regex = ""
+    regex = b""
 
     if skip_first_serial_type:
         signature = signature[1:]
@@ -240,9 +240,9 @@ def generate_signature_regex(signature, skip_first_serial_type=False):
 
             """
 
-            basic_serial_type_regex = ""
-            blob_regex = ""
-            text_regex = ""
+            basic_serial_type_regex = b""
+            blob_regex = b""
+            text_regex = b""
 
             for column_serial_type in column_serial_type_array:
                 if column_serial_type == -1:
@@ -255,7 +255,7 @@ def generate_signature_regex(signature, skip_first_serial_type=False):
             if blob_regex or text_regex:
 
                 if basic_serial_type_regex:
-                    basic_serial_type_regex = "[{}]".format(basic_serial_type_regex)
+                    basic_serial_type_regex = b"[%b]" % basic_serial_type_regex
 
                 if blob_regex and not text_regex:
 
@@ -267,7 +267,7 @@ def generate_signature_regex(signature, skip_first_serial_type=False):
                         getLogger(LOGGER_NAME).error(log_message)
                         raise CarvingError(log_message)
 
-                    regex += "(?:{}|{})".format(basic_serial_type_regex, blob_regex)
+                    regex += b"(?:%b|%b)" % (basic_serial_type_regex, blob_regex)
 
                 elif not blob_regex and text_regex:
 
@@ -280,15 +280,15 @@ def generate_signature_regex(signature, skip_first_serial_type=False):
                         getLogger(LOGGER_NAME).error(log_message)
                         raise CarvingError(log_message)
 
-                    regex += "(?:{}|{})".format(basic_serial_type_regex, text_regex)
+                    regex += b"(?:%b|%b)" % (basic_serial_type_regex, text_regex)
 
                 elif blob_regex and text_regex:
 
-                    var_length_regex = blob_regex + "|" + text_regex
+                    var_length_regex = blob_regex + b"|" + text_regex
                     if basic_serial_type_regex:
-                        regex += "(?:{}|{})".format(basic_serial_type_regex, var_length_regex)
+                        regex += b"(?:%b|%b)" % (basic_serial_type_regex, var_length_regex)
                     else:
-                        regex += "(?:{})".format(var_length_regex)
+                        regex += b"(?:%b)" % var_length_regex
 
                 else:
                     log_message = "No appropriate regular expressions were found for basic serial type, blob, or " \
@@ -315,7 +315,7 @@ def generate_signature_regex(signature, skip_first_serial_type=False):
                     getLogger(LOGGER_NAME).error(log_message)
                     raise CarvingError(log_message)
 
-                regex += "[{}]".format(basic_serial_type_regex)
+                regex += b"[%b]" % basic_serial_type_regex
 
         else:
 

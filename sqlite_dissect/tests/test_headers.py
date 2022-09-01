@@ -314,7 +314,7 @@ def test_journal_header_init(rollback_journal_header_byte_array, expected_value)
         
         assert journal_header.page_count == (
             ROLLBACK_JOURNAL_ALL_CONTENT_UNTIL_END_OF_FILE
-            if rollback_journal_header_byte_array[8:12] == ROLLBACK_JOURNAL_HEADER_ALL_CONTENT.decode("hex")
+            if rollback_journal_header_byte_array[8:12] == ROLLBACK_JOURNAL_HEADER_ALL_CONTENT
             else unpack(b">I", rollback_journal_header_byte_array[8:12])[0]
         )
 
