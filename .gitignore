@@ -33,6 +33,7 @@
 /case
 /.pytest_cache
 /htmlcov
+/test_files/corpus/
 /docs/build
 *.coverage
 

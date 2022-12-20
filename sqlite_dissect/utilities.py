@@ -1,15 +1,15 @@
-import hashlib
 import logging
+import hashlib
+
+from os import walk, makedirs, path
+from os.path import exists, isdir, join
 from binascii import hexlify
-from hashlib import md5
 from logging import getLogger
 from re import compile
 from struct import pack
 from struct import unpack
-from os import walk, makedirs, path
-from os.path import exists, isdir, join
-from sqlite_dissect.constants import ALL_ZEROS_REGEX, SQLITE_DATABASE_HEADER_LENGTH, MAGIC_HEADER_STRING, \
-    MAGIC_HEADER_STRING_ENCODING, SQLITE_FILE_EXTENSIONS
+from sqlite_dissect.constants import ALL_ZEROS_REGEX, MAGIC_HEADER_STRING, SQLITE_DATABASE_HEADER_LENGTH, \
+    MAGIC_HEADER_STRING_ENCODING
 from sqlite_dissect.constants import LOGGER_NAME
 from sqlite_dissect.constants import OVERFLOW_HEADER_LENGTH
 from sqlite_dissect.constants import BLOB_SIGNATURE_IDENTIFIER
@@ -19,7 +19,6 @@ from sqlite_dissect._version import __version__
 from configargparse import ArgParser
 
 """
-
 utilities.py
 
 This script holds general utility functions for reference by the sqlite carving library.
@@ -149,7 +148,7 @@ def get_class_instance(class_name):
 
 
 def get_md5_hash(string):
-    md5_hash = md5()
+    md5_hash = hashlib.md5()
     md5_hash.update(string)
     return md5_hash.hexdigest().upper()
 
@@ -280,7 +279,6 @@ def get_sqlite_files(path):
     Parses the path, validates it exists, and returns a list of all valid file(s) at the provided path. If the provided
     path is a file, it ensures it's a valid SQLite file and returns the path. If it's a directory, it validates all
     files within the directory and adds valid SQLite files to the path list.
-
     :param path: the string path to the file or directory in which SQLite files should be discovered.
     :raises:
         IOError when the provided path does not exist in the filesystem.
@@ -292,7 +290,7 @@ def get_sqlite_files(path):
         if isdir(path):
             for root, dirnames, filenames in walk(path):
                 for filename in filenames:
-                    if filename.endswith(SQLITE_FILE_EXTENSIONS):
+                    if filename.endswith((".db", ".sqlite", ".sqlite3")):
                         # Ensure the SQLite file is valid
                         relative_path = join(root, filename)
                         if is_sqlite_file(relative_path):

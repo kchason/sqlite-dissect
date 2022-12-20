@@ -43,6 +43,9 @@ jobs:
         run: |
           # Create the directory for the test output
           mkdir output
+          # Get the corpus of SQLite files for testing
+          curl -o test_files/corpus.zip https://digitalcorpora.s3.amazonaws.com/corpora/sql/sqlite_forensic_corpus_v1.0.zip
+          unzip test_files/corpus.zip -d test_files/corpus/
           # Run the test suite
           pytest --cov-report term-missing --cov-report html --cov=sqlite_dissect --cov-config=.coveragerc
 
