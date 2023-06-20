@@ -1,11 +1,9 @@
-from binascii import hexlify
-from binascii import unhexlify
+from binascii import hexlify, unhexlify
 from logging import getLogger
-from sqlite_dissect.constants import BLOB_SIGNATURE_IDENTIFIER
-from sqlite_dissect.constants import LOGGER_NAME
-from sqlite_dissect.constants import TEXT_SIGNATURE_IDENTIFIER
-from sqlite_dissect.exception import CarvingError
-from sqlite_dissect.exception import InvalidVarIntError
+
+from sqlite_dissect.constants import (BLOB_SIGNATURE_IDENTIFIER, LOGGER_NAME,
+                                      TEXT_SIGNATURE_IDENTIFIER)
+from sqlite_dissect.exception import CarvingError, InvalidVarIntError
 from sqlite_dissect.utilities import decode_varint
 
 """
@@ -178,9 +176,9 @@ def generate_regex_for_simplified_serial_type(simplified_serial_type):
     """
 
     if simplified_serial_type == -2:
-        return "(?:[\x0C-\x7F]|[\x80-\xFF]{1,7}[\x00-\x7F])"
+        return b"(?:[\x0C-\x7F]|[\x80-\xFF]{1,7}[\x00-\x7F])"
     elif simplified_serial_type == -1:
-        return "(?:[\x0D-\x7F]|[\x80-\xFF]{1,7}[\x00-\x7F])"
+        return b"(?:[\x0D-\x7F]|[\x80-\xFF]{1,7}[\x00-\x7F])"
     elif 0 <= simplified_serial_type <= 9:
         return unhexlify("0{}".format(simplified_serial_type))
     else:
@@ -250,7 +248,7 @@ def generate_signature_regex(signature, skip_first_serial_type=False):
                 elif column_serial_type == -2:
                     text_regex = generate_regex_for_simplified_serial_type(column_serial_type)
                 else:
-                    basic_serial_type_regex += generate_regex_for_simplified_serial_type(column_serial_type).decode()
+                    basic_serial_type_regex += generate_regex_for_simplified_serial_type(column_serial_type)
 
             if blob_regex or text_regex:
 
@@ -372,11 +370,11 @@ def get_content_size(serial_type):
 
     # A BLOB that is (N-12)/2 bytes in length
     elif serial_type >= 12 and serial_type % 2 == 0:
-        return (serial_type - 12) / 2
+        return (serial_type - 12) // 2
 
     # A string in the database encoding and is (N-13)/2 bytes in length.  The null terminator is omitted
     elif serial_type >= 13 and serial_type % 2 == 1:
-        return int((serial_type - 13) / 2)
+        return int((serial_type - 13) // 2)
 
     else:
         log_message = "Invalid serial type: {}."
