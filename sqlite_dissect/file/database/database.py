@@ -1,11 +1,11 @@
 from copy import copy
 from warnings import warn
-from sqlite_dissect.constants import BASE_VERSION_NUMBER
-from sqlite_dissect.constants import FILE_TYPE
-from sqlite_dissect.constants import FIRST_FREELIST_TRUNK_PAGE_INDEX
-from sqlite_dissect.constants import FIRST_FREELIST_TRUNK_PARENT_PAGE_NUMBER
-from sqlite_dissect.constants import SQLITE_3_7_0_VERSION_NUMBER
-from sqlite_dissect.constants import SQLITE_MASTER_SCHEMA_ROOT_PAGE
+
+from sqlite_dissect.constants import (BASE_VERSION_NUMBER, FILE_TYPE,
+                                      FIRST_FREELIST_TRUNK_PAGE_INDEX,
+                                      FIRST_FREELIST_TRUNK_PARENT_PAGE_NUMBER,
+                                      SQLITE_3_7_0_VERSION_NUMBER,
+                                      SQLITE_MASTER_SCHEMA_ROOT_PAGE)
 from sqlite_dissect.exception import DatabaseParsingError
 from sqlite_dissect.file.database.page import FreelistTrunkPage
 from sqlite_dissect.file.database.utilities import create_pointer_map_pages
@@ -98,7 +98,7 @@ class Database(Version):
                 raise DatabaseParsingError(log_message)
 
             # Calculate the number of pages from the file size and page size
-            self.database_size_in_pages = self.file_handle.file_size / self.page_size
+            self.database_size_in_pages = self.file_handle.file_size // self.page_size
 
         # The database header size in pages is set and the version valid for number does not equal the change counter
         elif self.database_header.version_valid_for_number != self.database_header.file_change_counter:
@@ -111,7 +111,7 @@ class Database(Version):
             """
 
             # Calculate the number of pages from the file size and page size
-            self.database_size_in_pages = self.file_handle.file_size / self.page_size
+            self.database_size_in_pages = self.file_handle.file_size // self.page_size
 
             log_message = "Database header for version: {} specifies a database size in pages of {} but version " \
                           "valid for number: {} does not equal the file change counter: {} for sqlite " \
@@ -145,7 +145,7 @@ class Database(Version):
 
             """
 
-            calculated_size_in_pages = self.file_handle.file_size / self.page_size
+            calculated_size_in_pages = self.file_handle.file_size // self.page_size
 
             if self.database_header.database_size_in_pages != calculated_size_in_pages:
 

@@ -1,8 +1,8 @@
 from logging import getLogger
 from struct import unpack
-from sqlite_dissect.constants import FILE_TYPE
-from sqlite_dissect.constants import LOGGER_NAME
-from sqlite_dissect.constants import WAL_INDEX_HEADER_LENGTH
+
+from sqlite_dissect.constants import (FILE_TYPE, LOGGER_NAME,
+                                      WAL_INDEX_HEADER_LENGTH)
 from sqlite_dissect.file.file_handle import FileHandle
 
 """
@@ -28,7 +28,7 @@ class WriteAheadLogIndex(object):
         zero = False
         start = WAL_INDEX_HEADER_LENGTH
         while not zero:
-            i = (start - WAL_INDEX_HEADER_LENGTH) / 4
+            i = (start - WAL_INDEX_HEADER_LENGTH) // 4
             data = unpack(b"<I", self._file_handle.read_data(start, 4))[0]
             if data == 0:
                 zero = True
@@ -41,7 +41,7 @@ class WriteAheadLogIndex(object):
         u16_offset = start
         number_found = 0
         while u16_offset < self._file_handle.file_size:
-            i = (u16_offset - start) / 2
+            i = (u16_offset - start) // 2
             data = unpack(b"<H", self._file_handle.read_data(u16_offset, 2))[0]
             if data != 0:
                 number_found += 1
