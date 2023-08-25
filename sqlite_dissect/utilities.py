@@ -3,15 +3,22 @@ import logging
 from binascii import hexlify
 from hashlib import md5
 from logging import getLogger
+from os import makedirs, path, walk
+from os.path import exists, isdir, join
 from re import compile
 from struct import pack, unpack
-from os import walk, makedirs, path
-from os.path import exists, isdir, join
-from sqlite_dissect.constants import ALL_ZEROS_REGEX, SQLITE_DATABASE_HEADER_LENGTH, MAGIC_HEADER_STRING, \
-    SQLITE_FILE_EXTENSIONS, LOGGER_NAME, OVERFLOW_HEADER_LENGTH, BLOB_SIGNATURE_IDENTIFIER, TEXT_SIGNATURE_IDENTIFIER
-from sqlite_dissect.exception import InvalidVarIntError
-from sqlite_dissect._version import __version__
+
 from configargparse import ArgParser
+
+from sqlite_dissect._version import __version__
+from sqlite_dissect.constants import (ALL_ZEROS_REGEX,
+                                      BLOB_SIGNATURE_IDENTIFIER, LOGGER_NAME,
+                                      MAGIC_HEADER_STRING,
+                                      OVERFLOW_HEADER_LENGTH,
+                                      SQLITE_DATABASE_HEADER_LENGTH,
+                                      SQLITE_FILE_EXTENSIONS,
+                                      TEXT_SIGNATURE_IDENTIFIER)
+from sqlite_dissect.exception import InvalidVarIntError
 
 """
 
@@ -214,12 +221,12 @@ def get_record_content(serial_type, record_body, offset=0):
 
     # A BLOB that is (N-12)/2 bytes in length
     elif serial_type >= 12 and serial_type % 2 == 0:
-        content_size = int((serial_type - 12) / 2)
+        content_size = int((serial_type - 12) // 2)
         value = record_body[offset:offset + content_size]
 
     # A string in the database encoding and is (N-13)/2 bytes in length.  The nul terminator is omitted
     elif serial_type >= 13 and serial_type % 2 == 1:
-        content_size = int((serial_type - 13) / 2)
+        content_size = int((serial_type - 13) // 2)
         value = record_body[offset:offset + content_size]
 
     else:

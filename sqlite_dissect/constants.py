@@ -1,4 +1,9 @@
-from collections.abc import MutableMapping
+# https://docs.python.org/3.9/library/collections.html
+try:
+    from collections.abc import MutableMapping
+except ImportError:
+    from collections import MutableMapping
+
 from logging import getLogger
 from re import compile
 from sys import maxunicode
