@@ -1,23 +1,18 @@
 from struct import unpack
 from warnings import warn
-from sqlite_dissect.carving.utilities import calculate_body_content_size
-from sqlite_dissect.carving.utilities import calculate_serial_type_definition_content_length_min_max
-from sqlite_dissect.carving.utilities import decode_varint_in_reverse
-from sqlite_dissect.carving.utilities import get_content_size
-from sqlite_dissect.constants import BLOB_SIGNATURE_IDENTIFIER
-from sqlite_dissect.constants import CELL_LOCATION
-from sqlite_dissect.constants import FILE_TYPE
-from sqlite_dissect.constants import TEXT_SIGNATURE_IDENTIFIER
-from sqlite_dissect.exception import CellCarvingError
-from sqlite_dissect.exception import InvalidVarIntError
+
+from sqlite_dissect.carving.utilities import (
+    calculate_body_content_size,
+    calculate_serial_type_definition_content_length_min_max,
+    decode_varint_in_reverse, get_content_size)
+from sqlite_dissect.constants import (BLOB_SIGNATURE_IDENTIFIER, CELL_LOCATION,
+                                      FILE_TYPE, TEXT_SIGNATURE_IDENTIFIER)
+from sqlite_dissect.exception import CellCarvingError, InvalidVarIntError
 from sqlite_dissect.file.database.page import BTreeCell
-from sqlite_dissect.file.database.payload import Payload
-from sqlite_dissect.file.database.payload import RecordColumn
-from sqlite_dissect.utilities import decode_varint
-from sqlite_dissect.utilities import encode_varint
-from sqlite_dissect.utilities import get_md5_hash
-from sqlite_dissect.utilities import get_record_content
-from sqlite_dissect.utilities import get_serial_type_signature
+from sqlite_dissect.file.database.payload import Payload, RecordColumn
+from sqlite_dissect.utilities import (decode_varint, encode_varint,
+                                      get_md5_hash, get_record_content,
+                                      get_serial_type_signature)
 
 """
 
@@ -221,7 +216,7 @@ class CarvedRecord(Payload):
         self.truncated_beginning = False
         self.truncated_ending = False
 
-        record_column_md5_hash_strings = [""] * self.number_of_columns
+        record_column_md5_hash_strings = [b""] * self.number_of_columns
 
         column_index = 0
         body_byte_size = 0
@@ -273,7 +268,7 @@ class CarvedRecord(Payload):
 
                     self.serial_type_signature += str(get_serial_type_signature(first_serial_type))
 
-                    record_column_md5_hash_strings[column_index] = ""
+                    record_column_md5_hash_strings[column_index] = b""
 
                     self.serial_type_definition_size += first_serial_type_varint_length
 
@@ -439,7 +434,7 @@ class CarvedRecord(Payload):
 
                         self.serial_type_signature += str(get_serial_type_signature(first_serial_type))
 
-                        record_column_md5_hash_strings[column_index] = ""
+                        record_column_md5_hash_strings[column_index] = b""
 
                         self.serial_type_definition_size += first_serial_type_varint_length
 

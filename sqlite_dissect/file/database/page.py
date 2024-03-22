@@ -1,57 +1,48 @@
 from abc import ABCMeta
 from binascii import hexlify
 from logging import getLogger
-from re import sub
 from struct import unpack
 from warnings import warn
-from sqlite_dissect.constants import CELL_LOCATION
-from sqlite_dissect.constants import CELL_MODULE
-from sqlite_dissect.constants import CELL_POINTER_BYTE_LENGTH
-from sqlite_dissect.constants import CELL_SOURCE
-from sqlite_dissect.constants import FIRST_OVERFLOW_PAGE_INDEX
-from sqlite_dissect.constants import FIRST_OVERFLOW_PAGE_NUMBER_LENGTH
-from sqlite_dissect.constants import FIRST_OVERFLOW_PARENT_PAGE_NUMBER
-from sqlite_dissect.constants import FREEBLOCK_BYTE_LENGTH
-from sqlite_dissect.constants import FREELIST_HEADER_LENGTH
-from sqlite_dissect.constants import FREELIST_LEAF_PAGE_NUMBER_LENGTH
-from sqlite_dissect.constants import FREELIST_NEXT_TRUNK_PAGE_LENGTH
-from sqlite_dissect.constants import INDEX_INTERIOR_CELL_CLASS
-from sqlite_dissect.constants import INDEX_INTERIOR_PAGE_HEX_ID
-from sqlite_dissect.constants import INDEX_LEAF_CELL_CLASS
-from sqlite_dissect.constants import INDEX_LEAF_PAGE_HEX_ID
-from sqlite_dissect.constants import INTERIOR_PAGE_HEADER_CLASS
-from sqlite_dissect.constants import LEAF_PAGE_HEADER_CLASS
-from sqlite_dissect.constants import LEFT_CHILD_POINTER_BYTE_LENGTH
-from sqlite_dissect.constants import LOGGER_NAME
-from sqlite_dissect.constants import MASTER_PAGE_HEX_ID
-from sqlite_dissect.constants import NEXT_FREEBLOCK_OFFSET_LENGTH
-from sqlite_dissect.constants import OVERFLOW_HEADER_LENGTH
-from sqlite_dissect.constants import PAGE_FRAGMENT_LIMIT
-from sqlite_dissect.constants import PAGE_HEADER_MODULE
-from sqlite_dissect.constants import PAGE_TYPE
-from sqlite_dissect.constants import PAGE_TYPE_LENGTH
-from sqlite_dissect.constants import POINTER_MAP_B_TREE_NON_ROOT_PAGE_TYPE
-from sqlite_dissect.constants import POINTER_MAP_B_TREE_ROOT_PAGE_TYPE
-from sqlite_dissect.constants import POINTER_MAP_ENTRY_LENGTH
-from sqlite_dissect.constants import POINTER_MAP_FREELIST_PAGE_TYPE
-from sqlite_dissect.constants import POINTER_MAP_OVERFLOW_FIRST_PAGE_TYPE
-from sqlite_dissect.constants import POINTER_MAP_OVERFLOW_FOLLOWING_PAGE_TYPE
-from sqlite_dissect.constants import POINTER_MAP_PAGE_TYPES
-from sqlite_dissect.constants import SQLITE_DATABASE_HEADER_LENGTH
-from sqlite_dissect.constants import SQLITE_MASTER_SCHEMA_ROOT_PAGE
-from sqlite_dissect.constants import TABLE_INTERIOR_CELL_CLASS
-from sqlite_dissect.constants import TABLE_INTERIOR_PAGE_HEX_ID
-from sqlite_dissect.constants import TABLE_LEAF_CELL_CLASS
-from sqlite_dissect.constants import TABLE_LEAF_PAGE_HEX_ID
-from sqlite_dissect.constants import ZERO_BYTE
-from sqlite_dissect.exception import BTreePageParsingError
-from sqlite_dissect.exception import CellParsingError
-from sqlite_dissect.exception import PageParsingError
-from sqlite_dissect.file.database.payload import decode_varint
-from sqlite_dissect.file.database.payload import Record
-from sqlite_dissect.utilities import calculate_expected_overflow
-from sqlite_dissect.utilities import get_class_instance
-from sqlite_dissect.utilities import get_md5_hash
+
+from sqlite_dissect.constants import (CELL_LOCATION, CELL_MODULE,
+                                      CELL_POINTER_BYTE_LENGTH, CELL_SOURCE,
+                                      FIRST_OVERFLOW_PAGE_INDEX,
+                                      FIRST_OVERFLOW_PAGE_NUMBER_LENGTH,
+                                      FIRST_OVERFLOW_PARENT_PAGE_NUMBER,
+                                      FREEBLOCK_BYTE_LENGTH,
+                                      FREELIST_HEADER_LENGTH,
+                                      FREELIST_LEAF_PAGE_NUMBER_LENGTH,
+                                      FREELIST_NEXT_TRUNK_PAGE_LENGTH,
+                                      INDEX_INTERIOR_CELL_CLASS,
+                                      INDEX_INTERIOR_PAGE_HEX_ID,
+                                      INDEX_LEAF_CELL_CLASS,
+                                      INDEX_LEAF_PAGE_HEX_ID,
+                                      INTERIOR_PAGE_HEADER_CLASS,
+                                      LEAF_PAGE_HEADER_CLASS,
+                                      LEFT_CHILD_POINTER_BYTE_LENGTH,
+                                      LOGGER_NAME, MASTER_PAGE_HEX_ID,
+                                      NEXT_FREEBLOCK_OFFSET_LENGTH,
+                                      OVERFLOW_HEADER_LENGTH,
+                                      PAGE_FRAGMENT_LIMIT, PAGE_HEADER_MODULE,
+                                      PAGE_TYPE, PAGE_TYPE_LENGTH,
+                                      POINTER_MAP_B_TREE_NON_ROOT_PAGE_TYPE,
+                                      POINTER_MAP_B_TREE_ROOT_PAGE_TYPE,
+                                      POINTER_MAP_ENTRY_LENGTH,
+                                      POINTER_MAP_FREELIST_PAGE_TYPE,
+                                      POINTER_MAP_OVERFLOW_FIRST_PAGE_TYPE,
+                                      POINTER_MAP_OVERFLOW_FOLLOWING_PAGE_TYPE,
+                                      POINTER_MAP_PAGE_TYPES,
+                                      SQLITE_DATABASE_HEADER_LENGTH,
+                                      SQLITE_MASTER_SCHEMA_ROOT_PAGE,
+                                      TABLE_INTERIOR_CELL_CLASS,
+                                      TABLE_INTERIOR_PAGE_HEX_ID,
+                                      TABLE_LEAF_CELL_CLASS,
+                                      TABLE_LEAF_PAGE_HEX_ID, ZERO_BYTE)
+from sqlite_dissect.exception import (BTreePageParsingError, CellParsingError,
+                                      PageParsingError)
+from sqlite_dissect.file.database.payload import Record, decode_varint
+from sqlite_dissect.utilities import (calculate_expected_overflow,
+                                      get_class_instance, get_md5_hash)
 
 """
 
@@ -112,10 +103,10 @@ class Page(object):
         self.unallocated_space_end_offset = None
 
     def __repr__(self):
-        return self.__str__().encode("hex")
+        return self.__str__()
 
     def __str__(self):
-        return sub("\t", "", sub("\n", " ", self.stringify()))
+        return self.stringify().replace('\t', '').replace('\n', ' ')
 
     def stringify(self, padding=""):
         string = padding + "Version Number: {}\n" \
@@ -302,7 +293,7 @@ class FreelistTrunkPage(Page):
                                                                FREELIST_HEADER_LENGTH])[0]
         self.freelist_leaf_page_numbers = []
         self.freelist_leaf_pages = []
-        for index in range(self.number_of_leaf_page_pointers):
+        for index in range(int(self.number_of_leaf_page_pointers)):
             start_offset = index * FREELIST_LEAF_PAGE_NUMBER_LENGTH + FREELIST_HEADER_LENGTH
             end_offset = start_offset + FREELIST_LEAF_PAGE_NUMBER_LENGTH
             freelist_leaf_page_number = unpack(b">I", page[start_offset:end_offset])[0]
@@ -424,7 +415,7 @@ class PointerMapPage(Page):
         self.md5_hex_digest = get_md5_hash(page)
 
         self.pointer_map_entries = []
-        for index in range(self.number_of_entries):
+        for index in range(int(self.number_of_entries)):
 
             offset = index * POINTER_MAP_ENTRY_LENGTH
 
@@ -551,10 +542,10 @@ class PointerMapEntry(object):
         self.md5_hex_digest = md5_hex_digest
 
     def __repr__(self):
-        return self.__str__().encode("hex")
+        return self.__str__()
 
     def __str__(self):
-        return sub("\t", "", sub("\n", " ", self.stringify()))
+        return self.stringify().replace('\t', '').replace('\n', ' ')
 
     def stringify(self, padding=""):
         string = padding + "Index: {}\n" \
@@ -582,10 +573,10 @@ class BTreePage(Page):
         page = self._version_interface.get_page_data(self.number)
 
         self.page_type = None
-        self.hex_type = page[0]
+        self.hex_type = chr(page[0]).encode()
 
         if self.hex_type == MASTER_PAGE_HEX_ID:
-            master_page_hex_type = page[SQLITE_DATABASE_HEADER_LENGTH]
+            master_page_hex_type = chr(page[SQLITE_DATABASE_HEADER_LENGTH]).encode()
             if master_page_hex_type == TABLE_INTERIOR_PAGE_HEX_ID:
                 self.page_type = PAGE_TYPE.B_TREE_TABLE_INTERIOR
             elif master_page_hex_type == TABLE_LEAF_PAGE_HEX_ID:
@@ -593,7 +584,7 @@ class BTreePage(Page):
             else:
                 log_message = "Page hex type for master page is: {} and not a table interior or table leaf page as " \
                               "expected in b-tree page: {} in page version: {} for version: {}."
-                log_message = log_message.format(hexlify(master_page_hex_type), self.number,
+                log_message = log_message.format(master_page_hex_type, self.number,
                                                  self.page_version_number, self.version_number)
                 self._logger.error(log_message)
                 raise BTreePageParsingError(log_message)
@@ -609,7 +600,7 @@ class BTreePage(Page):
         else:
             log_message = "Page hex type: {} is not a valid b-tree page type for b-tree page: {} in page version: {} " \
                           "for version: {}."
-            log_message = log_message.format(hexlify(self.hex_type), self.number, self.page_version_number,
+            log_message = log_message.format(hex(self.hex_type), self.number, self.page_version_number,
                                              self.version_number)
             self._logger.error(log_message)
             raise BTreePageParsingError(log_message)
@@ -657,7 +648,7 @@ class BTreePage(Page):
 
         self.cells = []
         self.calculated_cell_total_byte_size = 0
-        for cell_index in range(self.header.number_of_cells_on_page):
+        for cell_index in range(int(self.header.number_of_cells_on_page)):
             cell_start_offset = cell_pointer_array_offset + cell_index * CELL_POINTER_BYTE_LENGTH
             cell_end_offset = cell_start_offset + CELL_POINTER_BYTE_LENGTH
             cell_offset = unpack(b">H", page[cell_start_offset:cell_end_offset])[0]
@@ -907,10 +898,10 @@ class BTreeCell(object):
         self.md5_hex_digest = None
 
     def __repr__(self):
-        return self.__str__().encode("hex")
+        return self.__str__()
 
     def __str__(self):
-        return sub("\t", "", sub("\n", " ", self.stringify()))
+        return self.stringify().replace('\t', '').replace('\n', ' ')
 
     def stringify(self, padding=""):
         string = padding + "Version Number: {}\n" \
@@ -1058,7 +1049,7 @@ class TableLeafCell(BTreeCell):
 
         self.bytes_on_first_page = p
         if p > u - 35:
-            m = (((u - 12) * 32) / 255) - 23
+            m = (((u - 12) * 32) // 255) - 23
             self.bytes_on_first_page = m + ((p - m) % (u - 4))
             if self.bytes_on_first_page > u - 35:
                 self.bytes_on_first_page = m
@@ -1240,7 +1231,7 @@ class IndexInteriorCell(BTreeCell):
 
         u = self._page_size
         p = self.payload_byte_size
-        x = (((u - 12) * 64) / 255) - 23
+        x = (((u - 12) * 64) // 255) - 23
 
         """
 
@@ -1274,7 +1265,7 @@ class IndexInteriorCell(BTreeCell):
 
         self.bytes_on_first_page = p
         if p > x:
-            m = (((u - 12) * 32) / 255) - 23
+            m = (((u - 12) * 32) // 255) - 23
             self.bytes_on_first_page = m + ((p - m) % (u - 4))
             if self.bytes_on_first_page > x:
                 self.bytes_on_first_page = m
@@ -1483,7 +1474,7 @@ class IndexLeafCell(BTreeCell):
 
         u = self._page_size
         p = self.payload_byte_size
-        x = (((u - 12) * 64) / 255) - 23
+        x = (((u - 12) * 64) // 255) - 23
 
         """
 
@@ -1517,7 +1508,7 @@ class IndexLeafCell(BTreeCell):
 
         self.bytes_on_first_page = p
         if p > x:
-            m = (((u - 12) * 32) / 255) - 23
+            m = (((u - 12) * 32) // 255) - 23
             self.bytes_on_first_page = m + ((p - m) % (u - 4))
             if self.bytes_on_first_page > x:
                 self.bytes_on_first_page = m

@@ -298,6 +298,5 @@ TODO:
 - [ ] Add additional logging messages to the master schema entries skipped in signature generation. 
 - [ ] Integrate in the SQLite Forensic Corpus into tests.
 - [ ] Look into updating terminology for versioning to timelining.
-- [ ] Update code for compatibility with Python 3.
 - [ ] Create PyUnit tests.
 - [ ] Create a GUI.

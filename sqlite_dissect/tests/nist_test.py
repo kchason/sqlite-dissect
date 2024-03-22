@@ -5,9 +5,14 @@ from hashlib import md5
 from sqlite_dissect.entrypoint import main
 import io
 import sys
-import os
 import pytest
+
+from contextlib import redirect_stdout
+from hashlib import md5
+from io import StringIO
+from sqlite_dissect.entrypoint import main
 from sqlite_dissect.constants import FILE_TYPE
+from sqlite_dissect.tests import nist_assertions
 from sqlite_dissect.tests.utilities import db_file, parse_csv
 from sqlite_dissect.utilities import get_sqlite_files, parse_args
 
@@ -30,46 +35,47 @@ def test_header_reporting(db_file):
     db_filepath = str(db_file[0].resolve())
     hash_before_parsing = get_md5_hash(db_filepath)
 
-    parser_output = io.BytesIO()
-    sys.stdout = parser_output
     args = parse_args([db_filepath, '--header'])
     sqlite_files = get_sqlite_files(args.sqlite_path)
-    main(args, sqlite_files[0], len(sqlite_files) > 1)
 
-    reported_page_size = None
-    reported_journal_mode_read = None
-    reported_journal_mode_write = None
-    reported_num_pages = None
-    reported_encoding = None
-    for line in parser_output.getvalue().splitlines():
-        if "FILE FORMAT WRITE VERSION" in line.upper():
-            reported_journal_mode_write = line.split(': ')[1].strip()
-        elif "FILE FORMAT READ VERSION" in line.upper():
-            reported_journal_mode_read = line.split(': ')[1].strip()
-        elif "PAGE SIZE" in line.upper():
-            reported_page_size = int(line.split(': ')[1].strip())
-        elif "DATABASE SIZE IN PAGES" in line.upper():
-            reported_num_pages = int(line.split(': ')[1].strip())
-        elif "DATABASE TEXT ENCODING" in line.upper():
-            reported_encoding = line.split(': ')[1].strip()
+    with redirect_stdout(io.StringIO()) as output:
+        main(args, sqlite_files[0], len(sqlite_files) > 1)
 
-    actual_database = sqlite3.connect(db_filepath)
-    db_cursor = actual_database.cursor()
+        reported_page_size = None
+        reported_journal_mode_read = None
+        reported_journal_mode_write = None
+        reported_num_pages = None
+        reported_encoding = None
 
-    actual_page_size = fetch_pragma(db_cursor, 'page_size')
-    actual_journal_mode = fetch_pragma(db_cursor, 'journal_mode')
-    actual_num_pages = fetch_pragma(db_cursor, 'page_count')
-    actual_encoding = fetch_pragma(db_cursor, 'encoding')
+        for line in output.getvalue().splitlines():
+            if "FILE FORMAT WRITE VERSION" in line.upper():
+                reported_journal_mode_write = line.split(': ')[1].strip()
+            elif "FILE FORMAT READ VERSION" in line.upper():
+                reported_journal_mode_read = line.split(': ')[1].strip()
+            elif "PAGE SIZE" in line.upper():
+                reported_page_size = int(line.split(': ')[1].strip())
+            elif "DATABASE SIZE IN PAGES" in line.upper():
+                reported_num_pages = int(line.split(': ')[1].strip())
+            elif "DATABASE TEXT ENCODING" in line.upper():
+                reported_encoding = line.split(': ')[1].strip()
 
-    hash_after_parsing = get_md5_hash(db_filepath)
+        actual_database = sqlite3.connect(db_filepath)
+        db_cursor = actual_database.cursor()
 
-    nist_assertions.assert_md5_equals(hash_before_parsing, hash_after_parsing, db_file[0].name)
-    nist_assertions.assert_file_exists(db_filepath)
-    nist_assertions.assert_correct_page_size(reported_page_size, actual_page_size)
-    nist_assertions.assert_correct_journal_mode(reported_journal_mode_read, actual_journal_mode, 'r')
-    nist_assertions.assert_correct_journal_mode(reported_journal_mode_write, actual_journal_mode, 'w')
-    nist_assertions.assert_correct_num_pages(reported_num_pages, actual_num_pages)
-    nist_assertions.assert_correct_encoding(reported_encoding, actual_encoding)
+        actual_page_size = fetch_pragma(db_cursor, 'page_size')
+        actual_journal_mode = fetch_pragma(db_cursor, 'journal_mode')
+        actual_num_pages = fetch_pragma(db_cursor, 'page_count')
+        actual_encoding = fetch_pragma(db_cursor, 'encoding')
+
+        hash_after_parsing = get_md5_hash(db_filepath)
+
+        nist_assertions.assert_md5_equals(hash_before_parsing, hash_after_parsing, db_file[0].name)
+        nist_assertions.assert_file_exists(db_filepath)
+        nist_assertions.assert_correct_page_size(reported_page_size, actual_page_size)
+        nist_assertions.assert_correct_journal_mode(reported_journal_mode_read, actual_journal_mode, 'r')
+        nist_assertions.assert_correct_journal_mode(reported_journal_mode_write, actual_journal_mode, 'w')
+        nist_assertions.assert_correct_num_pages(reported_num_pages, actual_num_pages)
+        nist_assertions.assert_correct_encoding(reported_encoding, actual_encoding)
 
 
 # SFT-02
@@ -114,33 +120,33 @@ def test_schema_reporting(db_file, tmp_path):
                 current_table = None
                 row_count = 0
 
-    actual_database = sqlite3.connect(db_filepath)
-    db_cursor = actual_database.cursor()
-    db_cursor.execute("SELECT tbl_name, sql FROM sqlite_master WHERE type='table'")
+        actual_database = sqlite3.connect(db_filepath)
+        db_cursor = actual_database.cursor()
+        db_cursor.execute("SELECT tbl_name, sql FROM sqlite_master WHERE type='table'")
 
-    actual_tables = []
-    actual_columns = {}
-    actual_num_rows = {}
-    for table in db_cursor.fetchall():
-        actual_tables.append(table[0])
-        actual_columns[table[0]] = []
+        actual_tables = []
+        actual_columns = {}
+        actual_num_rows = {}
+        for table in db_cursor.fetchall():
+            actual_tables.append(table[0])
+            actual_columns[table[0]] = []
 
-        columns = table[1][table[1].find("(")+1:table[1].find(")")]
-        for column in columns.split(","):
-            actual_columns[table[0]].append(column.strip().split()[0])
+            columns = table[1][table[1].find("(")+1:table[1].find(")")]
+            for column in columns.split(","):
+                actual_columns[table[0]].append(column.strip().split()[0])
 
-        db_cursor.execute("SELECT COUNT(*) FROM %s" % table[0])
-        actual_num_rows[table[0]] = int(db_cursor.fetchone()[0])
+            db_cursor.execute("SELECT COUNT(*) FROM %s" % table[0])
+            actual_num_rows[table[0]] = int(db_cursor.fetchone()[0])
 
-    hash_after_parsing = get_md5_hash(db_filepath)
+        hash_after_parsing = get_md5_hash(db_filepath)
 
-    nist_assertions.assert_md5_equals(hash_before_parsing, hash_after_parsing, db_file[0].name)
-    nist_assertions.assert_file_exists(db_filepath)
-    nist_assertions.assert_correct_tables(reported_tables, actual_tables)
+        nist_assertions.assert_md5_equals(hash_before_parsing, hash_after_parsing, db_file[0].name)
+        nist_assertions.assert_file_exists(db_filepath)
+        nist_assertions.assert_correct_tables(reported_tables, actual_tables)
 
-    for table in reported_columns:
-        nist_assertions.assert_correct_columns(reported_columns[table], actual_columns[table], table)
-        nist_assertions.assert_correct_num_pages(reported_num_rows[table], actual_num_rows[table])
+        for table in reported_columns:
+            nist_assertions.assert_correct_columns(reported_columns[table], actual_columns[table], table)
+            nist_assertions.assert_correct_num_pages(reported_num_rows[table], actual_num_rows[table])
 
 
 # SFT-03
@@ -159,7 +165,7 @@ def test_row_recovery(db_file, tmp_path):
     args = parse_args([db_filepath, '-c',
     '-e', 'csv', '--directory', str(tmp_path)])
     sqlite_files = get_sqlite_files(args.sqlite_path)
-    main(args, sqlite_files[0], len(sqlite_files) > 1)
+    main(args, str(sqlite_files[0]), len(sqlite_files) > 1)
 
     recovered_rows = []
 
@@ -184,10 +190,9 @@ def test_metadata_reporting(db_file):
     parser_output = sys.stdout
     args = parse_args([db_filepath, '-c'])
     sqlite_files = get_sqlite_files(args.sqlite_path)
-    main(args, sqlite_files[0], len(sqlite_files) > 1)
+    main(args, str(sqlite_files[0]), len(sqlite_files) > 1)
 
     current_table = None
-    log_lines = ''
     for line in parser_output.read().splitlines():
         if "Master schema entry: " in line and "row type: table" in line:
             current_table = line[line.find("Master schema entry: "):line.find("row type: ")].split(': ')[1].strip()
@@ -199,11 +204,6 @@ def test_metadata_reporting(db_file):
 
         elif line == '-' * 15:
             current_table = None
-
-    # Logging for debugging purposes:
-    # with open(os.path.join(os.path.split(__file__)[0], 'log_files', db_file[0].name + '.log'), 'w') as log_file:
-    #     log_file.write("Recovered table rows:\n")
-    #     log_file.write(log_lines)
 
     hash_after_parsing = get_md5_hash(db_filepath)
 

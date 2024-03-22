@@ -8,6 +8,7 @@ import json
 import uuid
 from datetime import datetime
 from os import path
+from typing import Optional
 
 from sqlite_dissect._version import __version__
 from sqlite_dissect.utilities import hash_file
@@ -27,13 +28,13 @@ class CaseExporter(object):
     # Define the formatted logger that is provided by the main.py execution path
     logger = None
 
-    result_guids = []
+    result_guids: list = []
     
     configuration_guid = ""
 
     # Defines the initial structure for the CASE export. This will be supplemented with various methods that get called
     # from the main.py execution path.
-    case = {
+    case: dict = {
         "@context": {
             "case-investigation": "https://ontology.caseontology.org/case/investigation/",
             "kb": "http://example.org/kb/",
@@ -59,7 +60,7 @@ class CaseExporter(object):
         self.logger = logger
         self.configuration_guid = ("kb:configuration-" + str(uuid.uuid4()))
 
-    def register_options(self, options):
+    def register_options(self, options: list):
         """
         Adds the command line options provided as the configuration values provided and outputting them in the schema
         defined in the uco-configuration namespace.
@@ -92,7 +93,7 @@ class CaseExporter(object):
         # Add the configuration object to the in progress CASE object
         self.case['@graph'].append(configuration)
 
-    def add_observable_file(self, filepath, filetype=None):
+    def add_observable_file(self, filepath: str, filetype: str = None) -> Optional[str]:
         """
         Adds the file specified in the provided filepath as an ObservableObject in the CASE export. This method handles
         calculation of filesize, extension, MD5 hash, SHA1 hash, and other metadata expected in the Observable TTL spec.
@@ -201,8 +202,9 @@ class CaseExporter(object):
             return guid
         else:
             self.logger.critical('Attempting to add invalid filepath to CASE Observable export: {}'.format(filepath))
+            return None
 
-    def link_observable_relationship(self, source_guid, target_guid, relationship):
+    def link_observable_relationship(self, source_guid: str, target_guid: str, relationship: str) -> None:
         self.case['@graph'].append({
             "@id": ("kb:export-artifact-relationship-" + str(uuid.uuid4())),
             "@type": "uco-observable:ObservableRelationship",
@@ -219,7 +221,7 @@ class CaseExporter(object):
             "uco-core:isDirectional": True
         })
 
-    def add_export_artifacts(self, export_paths=None):
+    def add_export_artifacts(self, export_paths: list = None):
         """
         Loops through the list of provided export artifact paths and adds them as observables and links them to the
         original observable artifact
@@ -233,7 +235,7 @@ class CaseExporter(object):
             # Add the export result GUID to the list to be extracted
             self.result_guids.append(export_guid)
 
-    def generate_provenance_record(self, description, guids):
+    def generate_provenance_record(self, description: str, guids: list) -> Optional[str]:
         """
         Generates a provenance record for the tool and returns the GUID for the new object
         """
@@ -254,7 +256,7 @@ class CaseExporter(object):
         else:
             return None
 
-    def generate_header(self):
+    def generate_header(self) -> str:
         """
         Generates the header for the tool and returns the GUID for the ObservableRelationships
         """
@@ -293,7 +295,7 @@ class CaseExporter(object):
 
         return tool_guid
 
-    def generate_investigation_action(self, source_guids, tool_guid):
+    def generate_investigation_action(self, source_guids: list, tool_guid: str):
         """
         Builds the investigative action object as defined in the CASE ontology. This also takes in the start and end
         datetimes from the analysis.
@@ -327,7 +329,7 @@ class CaseExporter(object):
             }
         self.case['@graph'].append(action)
 
-    def export_case_file(self, export_path='output/case.json'):
+    def export_case_file(self, export_path: str = 'output/case.json'):
         """
         Exports the built CASE object to the path specified in the export_path parameter.
         """

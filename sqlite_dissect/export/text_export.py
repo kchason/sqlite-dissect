@@ -25,10 +25,8 @@ class CommitConsoleExporter(object):
 
     @staticmethod
     def write_header(master_schema_entry, page_type):
-        header = "\nMaster schema entry: {} row type: {} on page type: {} with sql: {}."
-        header = header.format(master_schema_entry.name, master_schema_entry.row_type,
-                               page_type, master_schema_entry.sql)
-        print(header)
+        print(f"\nMaster schema entry: {master_schema_entry.name} row type: {master_schema_entry.row_type} on page "
+              f"type: {page_type} with sql: {page_type}.")
 
     @staticmethod
     def write_commit(commit):
@@ -87,7 +85,7 @@ class CommitConsoleExporter(object):
             log_message = "Invalid commit page type: {} found for text export on master " \
                           "schema entry name: {} while writing to sqlite file name: {}."
             log_message = log_message.format(commit.page_type, commit.name)
-            logger.warn(log_message)
+            logger.warning(log_message)
             raise ExportError(log_message)
 
     @staticmethod
@@ -144,7 +142,6 @@ class CommitTextExporter(object):
 
         # Check if the file exists and if it does rename it
         if exists(self._text_file_name):
-
             # Generate a uuid to append to the file name
             new_file_name_for_existing_file = self._text_file_name + "-" + str(uuid4())
 
@@ -224,7 +221,7 @@ class CommitTextExporter(object):
             log_message = "Invalid commit page type: {} found for text export on master " \
                           "schema entry name: {}."
             log_message = log_message.format(commit.page_type, commit.name, self._text_file_name)
-            logger.warn(log_message)
+            logger.warning(log_message)
             raise ExportError(log_message)
 
     @staticmethod

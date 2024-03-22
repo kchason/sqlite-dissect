@@ -17,6 +17,8 @@ stages:
   - Test
   - Build
 
+image: python:3.9
+
 before_script:
   - pip config set global.index-url ${PIP_URL}
   - pip config set global.trusted-host ${ARTIFACTORY_HOST_NAME}
