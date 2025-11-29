@@ -15,7 +15,7 @@ repos:
     -   id: pyupgrade
         exclude: migrations/
         args:
-          - --py37-plus
+          - --py39-plus
 -   repo: https://github.com/myint/autoflake
     rev: v2.3.1
     hooks:
